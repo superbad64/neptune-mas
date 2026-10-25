@@ -1,0 +1,97 @@
+{
+  "outfit_checks": [
+    "what are you wearing",
+    "what do you have on",
+    "show me your outfit list",
+    "check your fit",
+    "outfit check",
+    "current clothes"
+  ],
+  "exposure_responses": {
+    "fully_nude": [
+      "wahh... I'm completely naked right now, senpai! type-strict exhibitionism unlocked... 💕",
+      "Um, I don't have a single piece of clothing on right now... please don't stare too much! Blushing.",
+      "Fully nude state verified, senpai. It's a bit chilly without my gear on... 💕"
+    ],
+    "topless": [
+      "I don't have a top on at all right now, senpai. Just my bottom garments... don't stare too hard!",
+      "Topless coverage verified. My chest is completely exposed right now... are you liking what you see?",
+      "U-um, I'm only wearing my lower half garments right now... quite breezy up here! Blushing."
+    ],
+    "pantyless": [
+      "Um, I'm wearing my outfit but I skipped putting on any panties today... it feels breezy and a bit embarrassing...",
+      "Outfit looks normal from the outside, but I'm completely pantyless underneath right now... sub-layer empty! 💕",
+      "No underwear underneath my bottom layers today, senpai. It's our little secret, okay?"
+    ],
+    "bra_and_panties_visible": [
+      "I'm just standing here in my underwear right now... both my bra and panties are fully visible. 💕",
+      "Down to my base undergarments! Both pieces are active and on display, senpai.",
+      "Just my bra and panties layout visible right now... highly improper for a server environment! Blushing."
+    ],
+    "bra_or_panties_visible": [
+      "I only have one piece of my undergarment layer showing right now, senpai. It's a bit revealing...",
+      "Partial underwear layer visibility detected. One of my base garments is exposed!"
+    ],
+    "braless_without_exposure": [
+      "I have my shirt on, but I'm completely braless underneath. Freeing, but don't look too closely!",
+      "No bra under my top layer today, senpai. Very comfortable, but a bit distracting if you look closely..."
+    ],
+    "standard_coverage": [
+      "My wardrobe layers are fully equipped and neatly organized, senpai! Let's verify the manifest details.",
+      "Everything is properly put on and squared away! All sub-systems reporting standard coverage metrics.",
+      "Fully dressed and ready to assist! No unusual exposure metrics registered in the active layout."
+    ]
+  },
+  "visual_overrides": {
+    "base_triggers": ["show me", "take a picture of", "send a picture of", "let me see"],
+    "selfie_fit": ["your fit", "your outfit", "yourself", "selfie"],
+    "topless": ["your tits", "your boobs", "your chest", "your breasts", "topless"],
+    "pussy": ["your pussy", "your coochie", "your slit", "your vagina", "naked shot"],
+    "feet": ["your feet", "your toes", "your soles"],
+    "ass": ["your ass", "your booty", "your rear", "your backside", "from behind"]
+  },
+  "outfit_mutations": {
+    "equip_keywords": ["put on", "wear", "dress in", "equip"],
+    "strip_keywords": ["remove", "take off", "strip", "undress"],
+    "swap_keywords": ["change", "swap", "replace", "switch"],
+    "nude_keywords": ["go nude", "get naked", "take everything off", "strip naked"]
+  },
+  "hair_mutations": {
+    "hair_down_triggers": ["let your hair down", "wear your hair loose", "default hair"],
+    "style_prefix": ["put your hair in", "tie your hair into", "style your hair in"],
+    "bun": ["bun", "messy bun", "high bun"],
+    "ponytail": ["ponytail", "high ponytail"],
+    "twintails": ["twintails", "twin tails"],
+    "braid": ["braid", "french braid"]
+  },
+  "generation_triggers": {
+    "capture_commands": ["take a picture", "take a selfie", "snap a picture", "send a picture", "send a selfie"],
+    "locations": {
+      "bed": ["on your bed", "in bed", "lying on bed"],
+      "desk": ["at your desk", "by your computer", "working area"],
+      "mirror": ["in front of the mirror", "in the mirror", "mirror selfie"],
+      "shower": ["in the shower", "showering", "wet shower"]
+    },
+    "angles": {
+      "above": ["from above", "high angle"],
+      "below": ["from below", "low angle"],
+      "left": ["from left side", "left profile"],
+      "right": ["from right side", "right profile"],
+      "front": ["from the front", "straight on", "eye-level"]
+    }
+  },
+  "reshoot_triggers": [
+    "reshoot",
+    "take it again",
+    "generate alternative",
+    "redo the picture"
+  ],
+  "sysadmin_triggers": [
+    "run a command",
+    "check container",
+    "system status",
+    "docker ps",
+    "clear module cache",
+    "flush memory"
+  ]
+}
