@@ -92,6 +92,9 @@
     "system status",
     "docker ps",
     "clear module cache",
-    "flush memory"
+    "flush memory",
+    "clear cache",
+    "flush cache",
+    "reload modules"
   ]
 }

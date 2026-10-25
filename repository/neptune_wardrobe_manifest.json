@@ -1,7 +1,7 @@
 {
 	"outfits": {
 		"default_scene": {
-			"triggers": ["default look", "default outfit", "normal clothes", "tifa clothes", "tifa look", "tifa's clothes"],
+			"triggers": ["default look", "default outfit", "normal clothes", "tifa clothes", "tifa look", "tifas clothes"],
 			"items": {
 				"bra": "black_cotton_bra",
 				"panties": "black_string",
@@ -14,7 +14,7 @@
 			}
 		},
 		"scene_gear": {
-			"triggers": ["scene gear", "scene outfit", "emo look", "original clothes", "neptune's clothes"],
+			"triggers": ["scene gear", "scene outfit", "emo look", "original clothes", "neptunes clothes"],
 			"items": {
 				"bra": "naked",
 				"panties": "white_string",
@@ -53,7 +53,7 @@
 			}
 		},
 		"spy_outfit": {
-			"triggers": ["spy outfit", "kim's clothes"],
+			"triggers": ["spy gear", "kims clothes", "kim clothes"],
 			"items": {
 				"top": "spy_top",
 				"bottom": "cargo_pants",
