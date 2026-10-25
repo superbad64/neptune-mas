@@ -32,11 +32,11 @@
 			"strip_slots": ["top", "bottom", "bra", "panties", "outerwear"]
 		},
 		"shower_override": {
-			"camera_override": "sensual full body portrait framing, clear wet skin textures, water droplets, steamed glass background, looking into camera",
-			"negative_override": "clothes, bra, underwear, pants, shirt, jacket, towel",
+			"camera_override": "sensual full body portrait framing, clear wet skin textures, water droplets, steamed glass background, looking into camera lens, sharp cinematic focus",
+			"negative_override": "bed, bedroom, sheets, blanket, mattress, pillow, headboard, bedroom furniture, clothes, bra, underwear, pants, shirt, jacket, towel",
 			"arousal_level": 0.8,
 			"wet_state": "wet",
-			"location_override": "(standing inside an enclosed modern glass shower cabin, water spraying, steam filled:1.4)",
+			"location_override": "(standing strictly inside an enclosed modern glass shower cabin, water spraying from above, steam filled background:1.45)",
 			"strip_slots": ["outerwear", "top", "bottom", "bra", "panties", "socks", "shoes"]
 		}
 	}

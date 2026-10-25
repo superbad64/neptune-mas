@@ -65,12 +65,28 @@ async def trigger_body_render(pipe_instance, raw_user_query: str, messages: list
             }
         }
 
-    wardrobe = current_state.get("wardrobe", {})
-    cosmetics = current_state.get("cosmetics", {})
-    arousal_data = current_state.get("arousal", {})
-    env_data = current_state.get("environment", {})
-    meta_cache = current_state.get("meta", {})
+    # =========================================================================
+    # 🧼 INTERCEPT 0: VOLATILE SHADOW STATE ROUTING ISOLATION GATE
+    # =========================================================================
+    # Extract and parse the tracking dict safely if the override module passed a temporary list container
+    volatile_state = None
+    if messages and isinstance(messages, list) and len(messages) > 0:
+        if isinstance(messages[0], dict) and "wardrobe" in messages[0]:
+            volatile_state = messages[0]
 
+    if volatile_state:
+        print("🧼 Volatile override frame detected. Flushing history arrays to block context blending...")
+        wardrobe = volatile_state.get("wardrobe", {})
+        cosmetics = volatile_state.get("cosmetics", {})
+        arousal_data = volatile_state.get("arousal", {})
+        env_data = volatile_state.get("environment", {})
+        meta_cache = volatile_state.get("meta", {})
+    else:
+        wardrobe = current_state.get("wardrobe", {})
+        cosmetics = current_state.get("cosmetics", {})
+        arousal_data = current_state.get("arousal", {})
+        env_data = current_state.get("environment", {})
+        meta_cache = current_state.get("meta", {})
     active_profile = getattr(pipe_instance.valves, "active_character_profile", "Neptune v1")
     state_key = "wet" if env_data.get("wet_state") == "wet" else "dry"
     
@@ -105,7 +121,12 @@ async def trigger_body_render(pipe_instance, raw_user_query: str, messages: list
 
     # Process standard layout maps assignment loops
     pm["top"] = manifest.get("tops", {}).get(wardrobe.get("top"), {}).get("prompt", "")
-    pm["pose"] = random.choice(pose_repo.get("standing_poses", ["standing casually looking forward"]))
+    
+    # Isolate pose selection parameters to prevent default bed postures during specialized room overrides
+    if volatile_state and "shower" in str(env_data.get("location", "")):
+        pm["pose"] = "standing tall inside shower cabin, water streaming down hair, arms relaxed at sides"
+    else:
+        pm["pose"] = random.choice(pose_repo.get("standing_poses", ["standing casually looking forward"]))
 
     # Compile hairstyle strings dynamically based on selected configurations
     hair_key = cosmetics.get("hair_style", "loose_hair")
@@ -124,7 +145,6 @@ async def trigger_body_render(pipe_instance, raw_user_query: str, messages: list
     if "redhead" in active_profile.lower() or "neptune" in active_profile.lower():
         raw_hair = raw_hair.replace("black hair", "ginger orange hair").replace("dark hair", "ginger orange hair")
     pm["hair"] = f"({raw_hair}:1.5)"
-
     # Compile array loops for accessory strings maps updates
     acc_keys = wardrobe.get("accessories", [])
     if isinstance(acc_keys, list):

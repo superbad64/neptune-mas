@@ -1,0 +1,30 @@
+{
+	"visual_overrides": {
+		"show_me_your_tits": {
+			"triggers": ["tits", "breasts", "boobs", "chest", "topless", "lift your shirt", "pull up your shirt"],
+			"camera_override": "sensual upper body portrait shot focusing heavily on exposed chest, entirely topless breasts, {active_angle}, naked upper torso",
+			"negative_override": "suspenders, overalls, straps crossing chest, bra, shirt, covering breasts, clothes",
+			"arousal_level": 1.0,
+			"nipples_state": "hard, erect",
+			"strip_slots": ["top", "bra", "outerwear"],
+			"responses": [
+				"U-ugh... s-stop staring so intently, you absolute pervert! 🫣 I skipped my top layout just like you asked... do they look good to you or what, senpai? 💕",
+				"H-hey! My eyes are up here, senpai! 😤 ...B-but since you went out of your way to request it, I guess I can let you look closely this time... *blushes deeply* 🫣",
+				"*(covers her bare breasts shyly, breathing softly)* H-here... I took my shirt off just like you asked... do I look pretty? Blushing deeply."
+			]
+		},
+		"shower_override": {
+			"triggers": ["shower", "in the shower", "inside the shower", "picture in the shower"],
+			"camera_override": "sensual full body portrait framing, clear wet skin textures, water droplets, steamed glass background, looking into camera lens, sharp cinematic focus",
+			"negative_override": "bed, bedroom, sheets, blanket, mattress, pillow, headboard, bedroom furniture, clothes, bra, underwear, pants, shirt, jacket, towel",
+			"arousal_level": 0.8,
+			"wet_state": "wet",
+			"location_override": "(standing strictly inside an enclosed modern glass shower cabin, water spraying from above, steam filled background:1.45)",
+			"strip_slots": ["outerwear", "top", "bottom", "bra", "panties", "socks", "shoes"],
+			"responses": [
+				"*(wiping steam away from the glass shower panel, water running down her bare skin)* H-hey! S-senpai, what are you doing with that lens camera setup out there?! 😳 Turn around! Giggles... *blushes softly*",
+				"*(standing under the warm water jets, completely unclad and dripping wet)* The steam is getting so thick in here... 🌊 I-is the resolution framing capturing my skin textures properly from that angle, senpai? 💕"
+			]
+		}
+	}
+}

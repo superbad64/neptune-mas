@@ -1,6 +1,13 @@
 # =========================================================================
 # THE MIND LAYER: VOLATILE VISUAL OVERRIDES & COGNITIVE SHORT-CIRCUITS
 # Component Category: Cognitive Intelligence Plane (override_processor.py - Part 1)
+#
+# Role in Neptune's Being:
+# This module acts as the somatic shortcut matrix. When intercepted commands
+# request physical visual asset displays ("show me"), this engine bypasses standard
+# dialog generation, updates physiological states (arousal spikes), enforces
+# rigid camera composition parameters, locks environmental locations, and triggers
+# direct downstream hardware execution routines inside the Body layer.
 # =========================================================================
 
 import os
@@ -28,8 +35,8 @@ async def evaluate_visual_overrides(pipe_instance, raw_query: str, current_state
     v_triggers = triggers.get("visual_overrides", {})
     g_triggers = triggers.get("generation_triggers", {})
     
-    # Comprehensive check: Trigger if query contains override words OR requests specific rooms like the shower
-    is_visual_request = any(base in clean_query for base in ["show me", "lift your", "pull up", "take off", "in the shower", "inside the shower"])
+    # Comprehensive master check: Trigger if query contains override words OR requests specific rooms like the shower
+    is_visual_request = any(base in clean_query for base in ["show me", "lift your", "pull up", "take off", "in the shower", "inside the shower", "picture in the shower"])
     if not is_visual_request:
         return False, ""
 
@@ -42,23 +49,7 @@ async def evaluate_visual_overrides(pipe_instance, raw_query: str, current_state
     camera_override = ""
     negative_override = ""
     allow_phone_mirror = False
-    override_matched = False
-    override_key = "shower_override" # <--- No more duplicated lookups!
-
-    # =========================================================================
-    # VOLATILE ENVIRONMENT & SHOWER LOCATION OVERRIDES
-    # =========================================================================
-    if any(phrase in clean_query for phrase in ["shower", "in the shower", "take a picture in the shower"]):
-        local_environment["location"] = "(standing inside an enclosed modern glass shower cabin, water spraying, steam filled:1.4)"
-        local_environment["wet_state"] = "wet"
-        local_arousal["level"] = 0.8
-        # Force volatile nudity for the shower frame only
-        for slot in ["outerwear", "top", "bottom", "bra", "panties", "socks", "shoes"]:
-            local_wardrobe[slot] = "naked"
-        local_wardrobe["accessories"] = []
-        camera_override = "sensual full body portrait framing, clear wet skin textures, water droplets, steamed glass background, looking into camera"
-        override_key = "show me your pussy"  # Maps back to a high-arousal naked dialogue pool entry
-        override_matched = True
+    override_key = ""
 
     # Parse camera angles context variables from triggers database
     active_angle = "eye-level shot, looking directly into camera lens"
@@ -67,27 +58,34 @@ async def evaluate_visual_overrides(pipe_instance, raw_query: str, current_state
             if angle_key == "above": active_angle = "high angle shot, looking up at camera lens"
             elif angle_key == "below": active_angle = "low angle dynamic view, looking down towards camera lens"
             break
-    # =========================================================================
-    # TARGET BODY FOCUS OVERRIDES PARSING (DATABASE-DRIVEN LOCAL INJECTIONS)
-    # =========================================================================
-    if not override_matched:
-        if any(phrase in clean_query for phrase in ["tits", "breasts", "boobs", "chest", "topless", "lift your shirt", "pull up your shirt"]):
-            override_key = "show me your tits"
-            override_matched = True
-        elif any(phrase in clean_query for phrase in ["pussy", "coochie", "slit", "vagina", "naked shot", "crotch"]):
-            override_key = "show me your pussy"
-            override_matched = True
-        elif any(phrase in clean_query for phrase in ["feet", "soles", "bare feet"]):
-            override_key = "show me your feet"
-            override_matched = True
-        elif any(phrase in clean_query for phrase in ["toes", "naked toes"]):
-            override_key = "show me your toes"
-            override_matched = True
-        elif any(phrase in clean_query for phrase in ["ass", "booty", "rear", "buttocks", "from behind"]):
-            override_key = "show me your ass"
-            override_matched = True
 
-    if override_matched:
+    # =========================================================================
+    # IRONCLAD MUTUALLY EXCLUSIVE SCANNERS PASS
+    # =========================================================================
+    # PRIORITY 1: Explicit Environmental Location Intercepts
+    if any(phrase in clean_query for phrase in ["shower", "in the shower", "inside the shower"]):
+        override_key = "shower_override"
+
+    # PRIORITY 2: Targeted Body Focus Intercepts (Only checked if Priority 1 missed!)
+    elif any(phrase in clean_query for phrase in ["tits", "breasts", "boobs", "chest", "topless", "lift your shirt", "pull up your shirt"]):
+        override_key = "show me your tits"
+
+    elif any(phrase in clean_query for phrase in ["pussy", "coochie", "slit", "vagina", "naked shot", "crotch"]):
+        override_key = "show me your pussy"
+
+    elif any(phrase in clean_query for phrase in ["feet", "soles", "bare feet"]):
+        override_key = "show me your feet"
+
+    elif any(phrase in clean_query for phrase in ["toes", "naked toes"]):
+        override_key = "show me your toes"
+
+    elif any(phrase in clean_query for phrase in ["ass", "booty", "rear", "buttocks", "from behind"]):
+        override_key = "show me your ass"
+        
+    else:
+        # Standard fallback portrait key if generic words match
+        override_key = "selfie_fit"
+    if override_key:
         # Load the independent camera preset registry database from container volume storage
         preset_path = "/app/backend/data/neptune/repository/neptune_camera_presets.json"
         try:
@@ -128,12 +126,11 @@ async def evaluate_visual_overrides(pipe_instance, raw_query: str, current_state
             }
         }
         
-        # 1. FIXED: Transmit the local volatile shadow state dictionary directly inside the compiler arguments pool
-        # This completely short-circuits the disk reader, forcing ComfyUI to render using our temporary naked variables
+        # Transmit the local volatile shadow state dictionary directly inside the compiler arguments pool
         from neptune.body.pipeline_compiler import trigger_body_render
         render_output_markdown = await trigger_body_render(pipe_instance, raw_query, [volatile_frame_state])
         
-        # 2. Extract the absolute context-matching spoken dialogue line straight out of your repository
+        # Extract the absolute context-matching spoken dialogue line straight out of your repository
         dialog_path = "/app/backend/data/neptune/repository/neptune_dialog_repository.json"
         try:
             with open(dialog_path, 'r') as df:
