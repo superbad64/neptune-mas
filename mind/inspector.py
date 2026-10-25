@@ -46,7 +46,7 @@ def determine_exposure_state(wardrobe: dict) -> str:
 
 async def evaluate_outfit_interception(raw_query: str, current_state: dict) -> tuple:
     """Intercepts and short-circuits execution if the query asks about her current wardrobe clothing state."""
-    repo_dir = "/var/lib/docker/volumes/open-webui/_data/neptune/repository"
+    repo_dir = "/app/backend/data/neptune/repository"
     triggers_path = os.path.join(repo_dir, "neptune_interaction_triggers.json")
     
     try:
@@ -96,148 +96,141 @@ async def evaluate_outfit_interception(raw_query: str, current_state: dict) -> t
     full_report_output = "\n".join(lines)
     return True, full_report_output
 
-    async def pipe(self, body: dict, __event_emitter__=None) -> str:
-        """Master sequential orchestrator processing loop conduit thread."""
-        messages = body.get("messages", [])
-        if not messages:
-            return "wahh senpai! Transmitted execution matrix container was empty down the pipe loop... :c"
+async def process_wardrobe_mutations_and_routing(pipe_instance, raw_query: str, current_state: dict) -> tuple:
+    """Primary entry interface for the inspector routine. Handles check interceptions and outfit/hair mutations."""
+    clean_query = raw_query.lower().strip()
 
-        raw_user_query = messages[-1].get("content", "").strip()
+    # 1. Outfit rundown check
+    intercepted, report_payload = await evaluate_outfit_interception(clean_query, current_state)
+    if intercepted:
+        return True, report_payload
+
+    # 2. Overrides processor loop ("show me" behaviors)
+    from neptune.mind.override_processor import evaluate_visual_overrides
+    intercepted_override, override_render_data = await evaluate_visual_overrides(pipe_instance, raw_query, current_state)
+    if intercepted_override:
+        return True, override_render_data
+
+    # Load centralized lookup database registry arrays
+    repo_dir = "/app/backend/data/neptune/repository"
+    triggers_path = os.path.join(repo_dir, "neptune_interaction_triggers.json")
+    manifest_path = os.path.join(repo_dir, "neptune_wardrobe_manifest.json")
+    
+    try:
+        with open(triggers_path, 'r') as tf, open(manifest_path, 'r') as mf:
+            triggers = json.load(tf)
+            manifest = json.load(mf)
+    except Exception:
+        return False, ""
+
+    # 2.5. Strict Word-Boundary Reshoot Routing
+    reshoot_phrases = triggers.get("reshoot_triggers", ["reshoot", "take it again"])
+    is_strict_reshoot = any(re.search(r'\b' + re.escape(phrase) + r'\b', clean_query) for phrase in reshoot_phrases)
+    if_strict_reshoot = is_strict_reshoot  # safety padding alias
+    if is_strict_reshoot:
+        from neptune.body.reshoot_worker import execute_physical_image_reshoot
+        reshoot_render_markdown = await execute_physical_image_reshoot(pipe_instance, raw_query, [], current_state)
+        return True, reshoot_render_markdown
+
+    # BRANCH E: PURE IMAGE GENERATION / SELFIE INTERCEPT GATE
+    gen_triggers = triggers.get("generation_triggers", {}).get("capture_commands", ["take a selfie", "take a picture"])
+    if any(phrase in clean_query for phrase in gen_triggers):
+        from neptune.body.pipeline_compiler import trigger_body_render
+        render_output_markdown = await trigger_body_render(pipe_instance, raw_query, [])
+        return True, render_output_markdown
+
+    m_triggers = triggers.get("outfit_mutations", {})
+    h_triggers = triggers.get("hair_mutations", {})
+    wardrobe = current_state.setdefault("wardrobe", {})
+    cosmetics = current_state.setdefault("cosmetics", {})
+    state_mutated = False
+
+    # BRANCH A: GO NUDE SYSTEM SHORT-CIRCUIT
+    if any(k in clean_query for k in m_triggers.get("nude_keywords", [])):
+        for slot in ["outerwear", "top", "bottom", "bra", "panties", "socks", "shoes"]: wardrobe[slot] = "naked"
+        wardrobe["accessories"] = []
+        wardrobe["jewelry"] = "none"
+        state_mutated = True
+
+    # BRANCH B: EQUIP COMMANDS ("PUT ON")
+    elif any(k in clean_query for k in m_triggers.get("equip_keywords", [])):
+        outfits_pool = manifest.get("outfits", {})
+        outfit_found = None
         
-        # 1. Normalization preprocessor pass execution
-        normalized_query = self.apply_slang_preprocessor_normalization(raw_user_query)
+        # Apply your specified "s" token replacement rule to handle possessives cleanly
+        sanitized_query = clean_query.replace("'s", "s").replace("s'", "s")
+        
+        for name in outfits_pool.keys():
+            outfit_data = outfits_pool[name]
+            triggers_list = outfit_data.get("triggers", [name])
+            
+            # Check both explicit trigger words arrays or raw manifest object key tokens
+            has_trigger_match = any(t.lower() in sanitized_query for t in triggers_list)
+            if has_trigger_match or name.lower().replace("_", " ") in sanitized_query:
+                outfit_found = outfit_data
+                break
+        
+        if outfit_found:
+            items = outfit_found.get("items", outfit_found)
+            wardrobe["top"] = items.get("top", items.get("tops", "naked"))
+            wardrobe["bottom"] = items.get("bottom", items.get("bottoms", "naked"))
+            wardrobe["bra"] = items.get("bra", items.get("bras", "naked"))
+            wardrobe["panties"] = items.get("panties", items.get("panties_layer", "naked"))
+            wardrobe["socks"] = items.get("socks", items.get("hosiery", "naked"))
+            wardrobe["shoes"] = items.get("shoes", items.get("boots", "naked"))
+            wardrobe["accessories"] = items.get("accessories", [])
+            wardrobe["outerwear"] = "naked"
+            state_mutated = True
+        else:
+            for category, items_dict in manifest.items():
+                if category == "outfits": continue
+                for item_key in items_dict.keys():
+                    if item_key.lower().replace("_", " ") in sanitized_query:
+                        slot_map = {"tops": "top", "bottoms": "bottom", "bras": "bra", "panties": "panties", "socks": "socks", "shoes": "shoes", "jewelry": "jewelry", "outerwear": "outerwear"}
+                        target_slot = slot_map.get(category)
+                        if target_slot:
+                            wardrobe[target_slot] = item_key
+                            state_mutated = True
+                            break
 
-        # Establish base networking addresses mapping properties
-        raw_valve = str(self.valves.desktop_ollama_raw).strip()
+    # BRANCH C: STRIP / SWAP ACTIONS
+    elif any(k in clean_query for k in m_triggers.get("strip_keywords", [])) or any(k in clean_query for k in m_triggers.get("swap_keywords", [])):
+        slot_keywords = {
+            "outerwear": ["outerwear", "coat", "jacket"],
+            "top": ["top", "shirt", "blouse", "tank", "clothes"],
+            "bottom": ["bottom", "skirt", "pants", "shorts", "trousers"],
+            "bra": ["bra", "brassiere", "underwear top"],
+            "panties": ["panties", "underwear", "panties layer", "string"],
+            "socks": ["socks", "stockings", "thigh highs"],
+            "shoes": ["shoes", "boots", "footwear"]
+        }
+        for slot, keywords in slot_keywords.items():
+            if any(k in clean_query for k in keywords):
+                wardrobe[slot] = "naked"
+                state_mutated = True
+
+    # BRANCH D: HAIRSTYLE DYNAMIC TRANSITIONS
+    if any(k in clean_query for k in h_triggers.get("hair_down_triggers", [])):
+        cosmetics["hair_style"] = "default_scene"
+        state_mutated = True
+    elif any(p in clean_query for p in h_triggers.get("style_prefix", [])):
+        if any(b in clean_query for b in h_triggers.get("bun", [])): cosmetics["hair_style"] = "high_bun"
+        elif any(p in clean_query for p in h_triggers.get("ponytail", [])): cosmetics["hair_style"] = "high_ponytail"
+        elif any(t in clean_query for t in h_triggers.get("twintails", [])): cosmetics["hair_style"] = "twintails"
+        elif any(br in clean_query for br in h_triggers.get("braid", [])): cosmetics["hair_style"] = "braid"
+        state_mutated = True
+
+    # PERSISTENCE HANDSHAKE SYNC LAYER
+    if state_mutated:
+        raw_valve = str(pipe_instance.valves.desktop_ollama_raw).strip()
         match = re.search(r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}", raw_valve)
         target_host = match.group(0) if match else "10.0.0.64"
         base_http = f"http://{target_host}:8189"
-
-        # Load global system database state files from disk records
-        from neptune.mind.sysadmin.sysadmin_core import load_neptune_state, save_neptune_state
-        fallback_defaults = {
-            "wardrobe": {
-                "bra": "black_cotton_bra", "panties": "black_string", "socks": "black_thigh_highs", 
-                "top": "white_crop_tank", "bottom": "tifa_skirt", "shoes": "tifa_boots",
-                "accessories": ["tifa_gloves", "suspenders"], "jewelry": "teardrop_earrings", "outerwear": "naked"
-            },
-            "cosmetics": {"hair_style": "default_scene", "makeup": "default_makeup", "nails": "default_nails", "piercings": "default_piercings"},
-            "performance": {"body_pose": "default_pose", "expression": "default_expression"},
-            "environment": {"location": "inside my private room space", "wet_state": "dry"},
-            "arousal": {"level": 0.0, "wetness": "dry", "nipples": "soft"},
-            "meta": {"last_interaction_timestamp": 0.0}
-        }
-        current_state = await load_neptune_state(base_http, fallback_defaults)
-
-        # =========================================================================
-        # INTERCEPT 0: ADMINISTRATIVE SUPER-OVERRIDE CONTROL CONDUIT
-        # =========================================================================
-        if normalized_query.startswith("sysadmin:"):
-            admin_command = normalized_query.replace("sysadmin:", "").strip()
-            
-            # Local high-priority short-circuit for memory flushes
-            if any(phrase in admin_command for phrase in ["clear cache", "clear module cache", "flush cache", "reload modules"]):
-                print("🧼 Super-Override: Evicting compiled modules from RAM...")
-                for module in list(sys.modules.keys()):
-                    if "neptune" in module: del sys.modules[module]
-                return "### 🧼 SYSTEM SUPER-OVERRIDE REPORT\n\n*Administrative bypass executed successfully. Operational module caches have been forcefully evicted from RAM registers, senpai! 💕*"
-            
-            # 👗 LOCAL HIGH-PRIORITY SHORT-CIRCUIT FOR FORCE-EQUIPPING OUTFITS
-            if admin_command.startswith("dress "):
-                target_outfit_key = admin_command.replace("dress ", "").strip().replace(" ", "_")
-                
-                manifest_path = "/var/lib/docker/volumes/open-webui/_data/neptune/repository/neptune_wardrobe_manifest.json"
-                try:
-                    with open(manifest_path, 'r') as mf:
-                        manifest = json.load(mf)
-                    outfits_pool = manifest.get("outfits", {})
-                except Exception as e:
-                    return f"### 🚨 SUPER-OVERRIDE ERROR\n\n*Failed loading wardrobe manifest database file: `{str(e)}`*"
-                
-                # Perform a defensive lookup across keys case-insensitively
-                matched_key = next((k for k in outfits_pool.keys() if k.lower() == target_outfit_key.lower()), None)
-                
-                if matched_key:
-                    outfit_found = outfits_pool[matched_key]
-                    wardrobe = current_state.setdefault("wardrobe", {})
-                    
-                    wardrobe["top"] = outfit_found.get("top", outfit_found.get("tops", "naked"))
-                    wardrobe["bottom"] = outfit_found.get("bottom", outfit_found.get("bottoms", "naked"))
-                    wardrobe["bra"] = outfit_found.get("bra", outfit_found.get("bras", "naked"))
-                    wardrobe["panties"] = outfit_found.get("panties", outfit_found.get("panties_layer", "naked"))
-                    wardrobe["socks"] = outfit_found.get("socks", outfit_found.get("hosiery", "naked"))
-                    wardrobe["shoes"] = outfit_found.get("shoes", outfit_found.get("boots", "naked"))
-                    wardrobe["accessories"] = outfit_found.get("accessories", [])
-                    wardrobe["outerwear"] = "naked"
-                    
-                    await save_neptune_state(base_http, current_state)
-                    
-                    # Instantly route to outfit rundown layout generator to verify successful application
-                    from neptune.mind.inspector import evaluate_outfit_interception
-                    _, structural_report = await evaluate_outfit_interception("outfit check", current_state)
-                    return f"### 🔮 SYSTEM SUPER-OVERRIDE REPORT\n\n*Force-equipped target wardrobe footprint `{matched_key}` into system slots cleanly!*\n\n{structural_report}"
-                else:
-                    return f"### 🚨 SUPER-OVERRIDE ERROR\n\n*Outfit database lookup miss! Target profile identifier `{target_outfit_key}` does not exist under your manifest registry. Core available outfit configurations: `{', '.join(outfits_pool.keys())}`*"
-
-            # Forward any other trailing admin command down to the system tool terminal router
-            try:
-                from neptune.mind.sysadmin.sysadmin_core import handle_sysadmin_terminal_routing
-                return await handle_sysadmin_terminal_routing(admin_command, current_state)
-            except ImportError:
-                return f"### 🚨 SYSTEM SUPER-OVERRIDE FAULT\n\n*Bypass matched for command '{admin_command}', but backend terminal routing blocks are missing from `sysadmin_core.py`!*"
-
-        # 2. Process biological emotional decay ticking loops
-        from neptune.soul.mood_engine import process_emotional_decay_cycle
-        current_state = await process_emotional_decay_cycle(current_state)
-
-        # 3. Process cognitive Mind intercept checks (Wardrobe checks, modifications, visual overrides, reshoots)
-        from neptune.mind.inspector import process_wardrobe_mutations_and_routing
-        is_intercepted, output_payload_markdown = await process_wardrobe_mutations_and_routing(
-            pipe_instance=self,
-            raw_query=normalized_query,
-            current_state=current_state
-        )
-        if is_intercepted:
-            return output_payload_markdown
-
-        # Process Standard User Cache-Flushing Engine Triggers
-        cache_flush_phrases = ["clear cache", "clear module cache", "flush cache", "reload modules"]
-        try:
-            triggers_path = "/var/lib/docker/volumes/open-webui/_data/neptune/repository/neptune_interaction_triggers.json"
-            with open(triggers_path, 'r') as tf: triggers = json.load(tf)
-            sysadmin_phrases = triggers.get("sysadmin_triggers", ["run a command"])
-        except Exception:
-            sysadmin_phrases = ["run a command"]
-
-        if any(phrase in normalized_query for phrase in cache_flush_phrases):
-            for module in list(sys.modules.keys()):
-                if "neptune" in module: del sys.modules[module]
-            return "### 🧼 NEPTUNE SYSTEM ADMINISTRATIVE REPORT\n\n*Master memory registers and operational module caches have been successfully purged from RAM, senpai! Fresh disk source files reloaded completely. 💕*"
-
-        if any(phrase in normalized_query for phrase in sysadmin_phrases):
-            try:
-                from neptune.mind.sysadmin.sysadmin_core import handle_sysadmin_terminal_routing
-                return await handle_sysadmin_terminal_routing(normalized_query, current_state)
-            except ImportError:
-                return "### 🚨 NEPTUNE SYSTEM BLACKOUT\n\n*Wahh senpai! I intercepted the system command, but your terminal routing methods are missing from `sysadmin_core.py`!*"
-
-        # 4. Standard conversational prompt processing routes (THE SOUL LAYER)
-        from neptune.soul.chatter.chatter_core import prompt_conversational_core
-        raw_model_reply = await prompt_conversational_core(
-            pipe_instance=self,
-            context_prompt=raw_user_query,
-            chat_history=messages,
-            current_state=current_state
-        )
-
-        # Run the state-of-undress text wrapper routing formatter
-        from neptune.soul.dialog_router import route_conversational_flavor_injection
-        final_conduit_delivery_text = await route_conversational_flavor_injection(
-            pipe_instance=self,
-            base_reply=raw_model_reply,
-            current_state=current_state
-        )
-
-        # Commit state updates back to cache memory disk storage records
+        
+        from neptune.mind.sysadmin.sysadmin_core import save_neptune_state
         await save_neptune_state(base_http, current_state)
-        return final_conduit_delivery_text
+        
+        _, structural_report = await evaluate_outfit_interception("outfit check", current_state)
+        return True, structural_report
+
+    return False, ""

@@ -39,8 +39,8 @@
 				"outerwear": "naked"
 			}
 		},
-		"formal_wear": {
-			"triggers": ["3-piece costume", "the hitman"],
+		"the_hitman": {
+			"triggers": ["3-piece costume", "formal wear", "the hitman"],
 			"items": {
 				"bra": "black_cotton_bra",
 				"panties": "black_string",

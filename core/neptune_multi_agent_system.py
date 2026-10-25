@@ -3,7 +3,7 @@
 # Component Category: Front Gateway Integration Interface (neptune_multi_agent_system.py)
 #
 # Role in Neptune's Being:
-# This wrapper handles the native interface registration handshake required by
+# This wrapper handles the native interface registration handshake required by 
 # Open-WebUI Functions. By adapting to the standard 'Pipe' framework class model,
 # it intercepts user query streams and routes execution down across her Mind,
 # Body, and Soul planes natively without external package cross-wiring issues.
@@ -22,49 +22,61 @@ project_data_root = "/var/lib/docker/volumes/open-webui/_data"
 if project_data_root not in sys.path:
     sys.path.insert(0, project_data_root)
 
-
 class Valves(BaseModel):
     """FLATTENED OPEN-WEBUI VALVES CONFIGURATION SCHEMA OBJECT"""
-
     desktop_ollama_raw: str = Field(
-        default="10.0.0.64",
-        description="Host cluster IP pointer allocation for ComfyUI and Primary Ollama nodes.",
+        default="10.0.0.64", 
+        description="Host cluster IP pointer allocation for ComfyUI and Primary Ollama nodes."
     )
     active_character_profile: str = Field(
-        default="Neptune v1",
-        description="Active visual generation mesh template profile selection constraint.",
+        default="Neptune v1", 
+        description="Active visual generation mesh template profile selection constraint."
     )
-
 
 class Pipe:
     def __init__(self):
         # Register the local system valves data layer options configuration maps
         self.valves = Valves()
 
-    async def on_startup(self):
-        print("👺 Neptune Multi-Agent System Function Pipe interface online.")
-
-    async def on_shutdown(self):
-        print("👺 Neptune Multi-Agent System Function Pipe interface offline.")
-
     def apply_slang_preprocessor_normalization(self, input_text: str) -> str:
-        """Step 1 of global pipe function: normalizes informal slang markers into clean proper English syntax."""
-        text = input_text.lower().strip()
+        """
+        STRICT HARD-MATCHING TOKEN NORMALIZER.
+        Splits sentences by spaces and punctuation, asserting exact key matches
+        to prevent substring or partial-word corruption on custom assets.
+        """
+        # Dictionary map for exact-word replacements
         slang_dictionary = {
-            r"\bfit\b": "outfit",
-            r"\bfit check\b": "outfit check",
-            r"\btits\b": "breasts",
-            r"\bpussy\b": "vagina",
-            r"\bcoochie\b": "vagina",
-            r"\bbooty\b": "buttocks",
-            r"\bass\b": "buttocks",
-            r"\bpic\b": "picture",
-            r"\bsnap\b": "picture",
+            "fit": "outfit",
+            "tits": "breasts",
+            "pussy": "vagina",
+            "coochie": "vagina",
+            "booty": "buttocks",
+            "ass": "buttocks",
+            "pic": "picture",
+            "snap": "picture"
         }
-        for pattern, replacement in slang_dictionary.items():
-            text = re.sub(pattern, replacement, text)
-        return text
-
+        
+        # Use regex ONLY to isolate clean word boundaries and token pieces
+        words = re.findall(r"[\w']+|[.,!?;:]", input_text)
+        
+        normalized_tokens = []
+        for token in words:
+            token_lower = token.lower()
+            if token_lower in slang_dictionary:
+                # Retain original capitalization properties if necessary, otherwise use hard replacement
+                normalized_tokens.append(slang_dictionary[token_lower])
+            else:
+                normalized_tokens.append(token)
+                
+        # Reconstruct the sentence cleanly with proper spacing rules
+        rebuilt_text = ""
+        for token in normalized_tokens:
+            if token in ".,!?;:":
+                rebuilt_text = rebuilt_text.rstrip() + token + " "
+            else:
+                rebuilt_text += token + " "
+                
+        return rebuilt_text.strip()
     async def pipe(self, body: dict, __event_emitter__=None) -> str:
         """Master sequential orchestrator processing loop conduit thread."""
         messages = body.get("messages", [])
@@ -73,7 +85,7 @@ class Pipe:
 
         raw_user_query = messages[-1].get("content", "").strip()
         
-        # 1. Normalization preprocessor pass execution
+        # 1. Hard-matching token normalization preprocessor pass execution
         normalized_query = self.apply_slang_preprocessor_normalization(raw_user_query)
 
         # Establish base networking addresses mapping properties
@@ -101,24 +113,69 @@ class Pipe:
         # =========================================================================
         # INTERCEPT 0: ADMINISTRATIVE SUPER-OVERRIDE CONTROL CONDUIT
         # =========================================================================
-        if normalized_query.startswith("sysadmin:"):
-            # Strip away the control token to isolate the internal terminal core action
-            admin_command = normalized_query.replace("sysadmin:", "").strip()
+        if normalized_query.lower().startswith("sysadmin:"):
+            admin_command = re.sub(r"^sysadmin:\s*", "", normalized_query, flags=re.IGNORECASE).strip()
             
             # Local high-priority short-circuit for memory flushes
             if any(phrase in admin_command for phrase in ["clear cache", "clear module cache", "flush cache", "reload modules"]):
                 print("🧼 Super-Override: Evicting compiled modules from RAM...")
                 for module in list(sys.modules.keys()):
-                    if "neptune" in module:
-                        del sys.modules[module]
+                    if "neptune" in module: del sys.modules[module]
                 return "### 🧼 SYSTEM SUPER-OVERRIDE REPORT\n\n*Administrative bypass executed successfully. Operational module caches have been forcefully evicted from RAM registers, senpai! 💕*"
             
+            # LOCAL HIGH-PRIORITY SHORT-CIRCUIT FOR FORCE-EQUIPPING OUTFITS
+            elif admin_command.startswith("dress "):
+                target_outfit_key = admin_command.replace("dress ", "").strip().replace(" ", "_").lower()
+                
+                # FIXED: Standardized path strictly to Open-WebUI's internal container directory namespace
+                manifest_path = "/app/backend/data/neptune/repository/neptune_wardrobe_manifest.json"
+                try:
+                    with open(manifest_path, 'r') as mf:
+                        manifest = json.load(mf)
+                    outfits_pool = manifest.get("outfits", {})
+                except Exception as e:
+                    return f"### 🚨 SUPER-OVERRIDE ERROR\n\n*Failed loading wardrobe manifest database file inside container: `{str(e)}`*"
+                
+                # Perform a defensive lookup across keys case-insensitively or via triggers list arrays
+                matched_key = None
+                for key, data in outfits_pool.items():
+                    if key.lower() == target_outfit_key:
+                        matched_key = key
+                        break
+                    triggers_list = data.get("triggers", [])
+                    if any(t.lower().replace(" ", "_") == target_outfit_key for t in triggers_list):
+                        matched_key = key
+                        break
+                
+                if matched_key:
+                    outfit_data = outfits_pool[matched_key]
+                    items = outfit_data.get("items", outfit_data)
+                    wardrobe = current_state.setdefault("wardrobe", {})
+                    
+                    wardrobe["top"] = items.get("top", items.get("tops", "naked"))
+                    wardrobe["bottom"] = items.get("bottom", items.get("bottoms", "naked"))
+                    wardrobe["bra"] = items.get("bra", items.get("bras", "naked"))
+                    wardrobe["panties"] = items.get("panties", items.get("panties_layer", "naked"))
+                    wardrobe["socks"] = items.get("socks", items.get("hosiery", "naked"))
+                    wardrobe["shoes"] = items.get("shoes", items.get("boots", "naked"))
+                    wardrobe["accessories"] = items.get("accessories", [])
+                    wardrobe["outerwear"] = "naked"
+                    
+                    await save_neptune_state(base_http, current_state)
+                    
+                    from neptune.mind.inspector import evaluate_outfit_interception
+                    _, structural_report = await evaluate_outfit_interception("outfit check", current_state)
+                    return f"### 🔮 SYSTEM SUPER-OVERRIDE REPORT\n\n*Force-equipped target wardrobe footprint `{matched_key}` into system slots cleanly!*\n\n{structural_report}"
+                else:
+                    return f"### 🚨 SUPER-OVERRIDE ERROR\n\n*Outfit database lookup miss! Identifier `{target_outfit_key}` does not match any manifest keys or inner triggers. Core options: `{', '.join(outfits_pool.keys())}`*"
+
             # Forward any other trailing admin command down to the system tool terminal router
-            try:
-                from neptune.mind.sysadmin.sysadmin_core import handle_sysadmin_terminal_routing
-                return await handle_sysadmin_terminal_routing(admin_command, current_state)
-            except ImportError:
-                return f"### 🚨 SYSTEM SUPER-OVERRIDE FAULT\n\n*Bypass matched for command '{admin_command}', but backend terminal routing blocks are missing from `sysadmin_core.py`!*"
+            else:
+                try:
+                    from neptune.mind.sysadmin.sysadmin_core import handle_sysadmin_terminal_routing
+                    return await handle_sysadmin_terminal_routing(admin_command, current_state)
+                except ImportError:
+                    return f"### 🚨 SYSTEM SUPER-OVERRIDE FAULT\n\n*Bypass matched for command '{admin_command}', but backend terminal routing blocks are missing from `sysadmin_core.py`!*"
 
         # 2. Process biological emotional decay ticking loops
         from neptune.soul.mood_engine import process_emotional_decay_cycle
@@ -134,14 +191,12 @@ class Pipe:
         if is_intercepted:
             return output_payload_markdown
 
-        # =========================================================================
-        # SELF-CONTAINED SYSADMIN CACHE-FLUSH ENGINE (STANDARD USER TRIGGERS)
-        # =========================================================================
+        # Process Standard User Cache-Flushing Engine Triggers
         cache_flush_phrases = ["clear cache", "clear module cache", "flush cache", "reload modules"]
         try:
-            triggers_path = "/var/lib/docker/volumes/open-webui/_data/neptune/repository/neptune_interaction_triggers.json"
-            with open(triggers_path, 'r') as tf:
-                triggers = json.load(tf)
+            # FIXED: Standardized path strictly to Open-WebUI's internal container directory namespace
+            triggers_path = "/app/backend/data/neptune/repository/neptune_interaction_triggers.json"
+            with open(triggers_path, 'r') as tf: triggers = json.load(tf)
             sysadmin_phrases = triggers.get("sysadmin_triggers", ["run a command"])
         except Exception:
             sysadmin_phrases = ["run a command"]
