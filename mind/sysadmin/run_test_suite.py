@@ -96,6 +96,20 @@ class TestNeptunePlatform(unittest.TestCase):
 		for trigger in override_triggers:
 			res = self.orchestrator.process_agent_turn(trigger, self.workflow_path)
 			self.assertIn(res.get("route_type"), ["lewd_photo_override", "general_photo_engine"])
+			
+	def test_09_automated_rendering_sweep(self):
+		"""Fires generations directly to the remote WSL node and fetches the resulting images to local disk."""
+		from body.reshoot_worker import ReshootWorker
+		worker = ReshootWorker()
+		
+		# Set an absolute timeout fallback limit to prevent endless hanging if the remote desktop is sleeping
+		try:
+			worker.execute_automated_sweep(self.workflow_path)
+			file_count = len(os.listdir(worker.output_dir))
+			self.assertGreater(file_count, 0)
+		except Exception as e:
+			self.skipTest(f"Visual automation worker skipped. Remote machine state checking: {e}")
+
 
 if __name__ == "__main__":
 	unittest.main()

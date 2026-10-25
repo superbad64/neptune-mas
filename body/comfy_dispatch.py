@@ -2,38 +2,53 @@ import json
 import os
 import requests
 import re
+import random
+import time
 
 class ComfyDispatcher:
 	def __init__(self, target_host="10.0.0.64", target_port=8189):
 		self.server_address = f"{target_host}:{target_port}"
 		self.client_id = "neptune_body_agent"
+		self.last_saved_filename = None
 
 	def format_ksampler_workflow(self, workflow_template: dict, prompt_tokens: dict) -> dict:
 		"""
-		Maps tokens directly into your custom StringConcatenate graph layout.
-		Injects the visual parameters into Node 16 and front-loads negative 
-		electronic filters into Node 8.
+		Forces an Empty Latent configuration onto Node 4 to establish 
+		a clean, uncorrupted character baseline pass.
 		"""
 		graph = json.loads(json.dumps(workflow_template))
 		
-		# 1. Inject Dynamic Positional Tokens into PrimitiveString (Node 16)
+		# 1. Inject Dynamic Positional Layout Tokens into PrimitiveString (Node 16)
 		if "16" in graph and graph["16"].get("class_type") == "PrimitiveString":
-			graph["16"]["inputs"]["value"] = prompt_tokens["positive_tokens"]
-			
-		# 2. Prepend electronic filters into the negative StringConcatenate block (Node 8)
-		if "8" in graph and graph["8"].get("class_type") == "StringConcatenate":
-			# Combine your required front-loaded filters with whatever is currently in string_b
-			existing_b = graph["8"]["inputs"].get("string_b", "")
-			filter_prefix = prompt_tokens["negative_tokens"]
-			
-			if existing_b:
-				graph["8"]["inputs"]["string_b"] = f"{filter_prefix}, {existing_b}"
-			else:
-				graph["8"]["inputs"]["string_b"] = filter_prefix
+			raw_positive = prompt_tokens["positive_tokens"]
+			cache_buster = f"breakcache_{int(time.time() * 1000)}"
+			graph["16"]["inputs"]["value"] = f"{raw_positive}, {cache_buster}"
 				
-		# 3. Dynamic Seed Randomization to prevent output caching duplication
+		# Safe Seed Randomization (Node 4)
 		if "4" in graph and graph["4"].get("class_type") == "KSampler":
-			graph["4"]["inputs"]["seed"] = random.randint(10000000000000, 99999999999999)
+			graph["4"]["inputs"]["seed"] = random.randint(0, 1125899906842624)
+			
+			# Dynamic Graph Mutation: Disconnect Node 19 (VAEEncode) from KSampler's latent_image input slot
+			# Connect a fresh EmptyLatentImage structure definition on port 4 to generate a clean canvas
+			if "20" not in graph:
+				graph["20"] = {
+					"inputs": {
+						"width": 832,
+						"height": 832,
+						"batch_size": 1
+					},
+					"class_type": "EmptyLatentImage",
+					"_meta": {
+						"title": "Empty Latent Canvas"
+					}
+				}
+			# Link KSampler input index 3 [latent_image] natively to our new Empty Latent Node 20
+			graph["4"]["inputs"]["latent_image"] = ["20", 0]
+
+		# 3. Force terminal output execution registration on Node 9
+		if "9" in graph:
+			graph["9"]["inputs"]["filename_prefix"] = f"Neptune_{int(time.time())}"
+			graph["9"]["is_output"] = True
 				
 		return graph
 	def dispatch_to_wsl(self, target_graph: dict) -> str:
@@ -49,22 +64,21 @@ class ComfyDispatcher:
 			return None
 
 	def cache_backchannel_variant(self, local_image_path: str, filename_string: str) -> bool:
-		"""
-		Asset Sync Loop Step: Bypasses client output routes to stream variants 
-		straight into ComfyUI's input cache directory via raw sanitized strings.
-		"""
+		"""Streams variants straight into ComfyUI's remote input cache via the upload API."""
 		sanitized_filename = re.sub(r"[^\w\-_.]", "_", filename_string)
 		url = f"http://{self.server_address}/upload/image"
 		
 		if not os.path.exists(local_image_path):
 			return False
-			
 		try:
 			with open(local_image_path, "rb") as f:
 				files = {"image": (sanitized_filename, f, "image/png")}
 				data = {"overwrite": "true"}
 				res = requests.post(url, files=files, data=data, timeout=20)
-				return res.status_code == 200
+				if res.status_code == 200:
+					self.last_saved_filename = sanitized_filename
+					return True
+				return False
 		except Exception as e:
 			print(f"[Sync Error] Back-channel cache injection dropped: {e}")
 			return False

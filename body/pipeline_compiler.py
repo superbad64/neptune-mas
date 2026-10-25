@@ -6,13 +6,16 @@ import re
 class PipelineCompiler:
 	def __init__(
 		self, 
-		engine_path="/app/backend/data/neptune/repository/neptune_photo_engine.json",
-		overrides_path="/app/backend/data/neptune/repository/neptune_photo_overrides.json",
-		state_path="/app/backend/data/neptune/repository/neptune_state.json"
+		engine_path=None,
+		overrides_path=None,
+		state_path=None
 	):
-		self.engine_path = engine_path
-		self.overrides_path = overrides_path
-		self.state_path = state_path
+		current_dir = os.path.dirname(os.path.abspath(__file__))
+		base_dir = os.path.abspath(os.path.join(current_dir, ".."))
+		
+		self.engine_path = engine_path or os.path.join(base_dir, "repository", "neptune_photo_engine.json")
+		self.overrides_path = overrides_path or os.path.join(base_dir, "repository", "neptune_photo_overrides.json")
+		self.state_path = state_path or os.path.join(base_dir, "repository", "neptune_state.json")
 		
 		self.engine = self._load_json(self.engine_path)
 		self.overrides = self._load_json(self.overrides_path)
@@ -24,43 +27,22 @@ class PipelineCompiler:
 			return json.load(f)
 
 	def _get_active_state(self) -> dict:
-		"""Pulls running state safely from disk without corrupting attributes."""
+		"""Fetches active values, force-injecting scene_gear as the absolute default system configuration."""
 		if not os.path.exists(self.state_path):
-			return {"environment": "bed", "arousal": 0.0, "cosmetics": {}}
+			return {
+				"environment": "bed",
+				"active_outfit_key": "scene_gear",
+				"top": "white_shirt",
+				"bottom": "baggy_jeans",
+				"bra": "naked",
+				"panties": "white_string",
+				"socks": "white_socks",
+				"shoes": "high_tops"
+			}
 		with open(self.state_path, "r", encoding="utf-8") as f:
 			return json.load(f)
-	def _resolve_expression(self, user_input: str) -> tuple:
-		"""
-		Scans input text for explicit expressions (like ahegao).
-		Falls back to baseline happy/teasing selections if no triggers hit.
-		Returns a tuple of (expression_prompt, chosen_dialogue).
-		"""
-		text_lower = user_input.lower() if user_input else ""
-		
-		# 1. Check complex triggers first
-		expressions = self.engine.get("facial_expressions", {})
-		for exp_id, data in expressions.items():
-			for trigger in data.get("triggers", []):
-				# Use re.search to process true \b word boundary rules programmatically
-				pattern = r"\b" + re.escape(trigger.lower()) + r"\b"
-				if re.search(pattern, text_lower):
-					prompt = data.get("prompt", "")
-					dialogue = random.choice(data.get("response_pool", [""]))
-					return prompt, dialogue
-
-		# 2. Baseline happy fallbacks if no complex key match
-		baselines = self.engine.get("baseline_expressions", {})
-		chosen_id = random.choice(list(baselines.keys())) if baselines else "smiling"
-		baseline_data = baselines.get(chosen_id, {})
-		
-		prompt = baseline_data.get("prompt", "")
-		dialogue = random.choice(baseline_data.get("response_pool", [""]))
-		return prompt, dialogue
 	def compile_generation_payload(self, user_input: str = None, force_location: str = None) -> dict:
-		"""
-		Main execution entry point. Combines location bounds, pose vectors,
-		and face prompts into a sanitized dict tailored for your string nodes.
-		"""
+		"""Combines layout properties into a clean primitive block, force-injecting character anchors."""
 		state = self._get_active_state()
 		location = force_location or state.get("environment", "bed")
 		
@@ -69,24 +51,26 @@ class PipelineCompiler:
 			loc_matrix = self.engine.get("locations", {}).get("bed", {})
 			location = "bed"
 
-		# Resolve Pose and Camera Angle alignment constraints
-		allowed_pools = loc_matrix.get("allowed_pose_pools", [])
+		allowed_pools = loc_matrix.get("allowed_pose_pools", ["standing_poses"])
 		selected_pool = random.choice(allowed_pools) if allowed_pools else "standing_poses"
-		pose_string = random.choice(self.engine.get("poses", {}).get(selected_pool, ["standing upright"]))
+		
+		poses_pool = self.engine.get("poses", {}).get(selected_pool, ["standing upright"])
+		pose_string = random.choice(poses_pool) if poses_pool else "standing upright"
 
 		allowed_angles = loc_matrix.get("allowed_angles", ["eye-level shot"])
-		angle_string = random.choice(allowed_angles)
+		angle_string = random.choice(allowed_angles) if allowed_angles else "eye-level shot"
 
-		forced_mod = loc_matrix.get("forced_prompt_modifier", "")
 		face_prompt, matched_dialogue = self._resolve_expression(user_input)
 
-		# Build raw, dynamic layout string targeting PrimitiveString Node 16
-		positive_prompt = f"{pose_string}, {angle_string}, {face_prompt}"
-		if forced_mod:
-			positive_prompt += f", {forced_mod}"
+		# Strict physical-only appearance tokens. Completely strips out any conversational text or relationship words.
+		character_anchor = "1girl, solo, clean sharp focus, masterpiece, highest quality, neptune anime character, emo scene kid baddie appearance, dark messy scene hair, sharp framing, piercing blue eyes, realistic detailed skin textures"
+		wardrobe_prompt = "wearing a loose fit white t-shirt, dark grey oversized baggy jeans, sagging low on hips, studded belt, striped pink arm warmers, fingerless gloves"
 
-		# Enforce our front-loaded filter constraints targeting Concatenate Node 8
-		negative_prompt = "holding a phone, cellphone visible"
+		# Construct the clean text pass
+		positive_prompt = f"{character_anchor}, {wardrobe_prompt}, {pose_string}, {angle_string}, happy smile, cheerful expression"
+
+		# Exclude multi-character couple datasets completely via aggressive negative weights
+		negative_prompt = "2girls, multi-character, couple, group, boyfriend, husband, male, man, partner, holding a phone, cellphone visible, deformed face, worst quality, low quality, bad anatomy, text, watermark"
 
 		return {
 			"target_location": location,
