@@ -13,7 +13,17 @@
 import os
 import json
 import re
-from pydantic import BaseModel, Field
+
+# 🛡️ ENV-AGNOSTIC DEPENDENCY SAFETY GATE
+try:
+    from pydantic import BaseModel, Field
+except ModuleNotFoundError:
+    # Standalone fallback padding if executing outside Open-WebUI framework context
+    class BaseModel:
+        pass
+    def Field(default=None, description=""):
+        return default
+
 from neptune.mind.sysadmin.sysadmin_core import load_neptune_state, save_neptune_state
 from neptune.soul.mood_engine import process_emotional_decay_cycle
 
