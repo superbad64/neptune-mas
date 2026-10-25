@@ -1,237 +1,91 @@
-# =========================================================================
-# THE BODY LAYER: COMFYUI WORKER TRANSACTIONAL DISPATCHER
-# Component Category: Physical Sensory I/O Gateway (comfy_dispatch.py - Part 1)
-#
-# Role in Neptune's Being:
-# This module represents Neptune's nervous system. It acts as the direct
-# communication bridge to the external GPU worker node, converting compiled
-# prompt matrices into explicit raw JSON execution graphs, establishing
-# websocket streams, and tracking image generation pipelines to completion.
-# =========================================================================
-
 import json
-import uuid
-import base64
-import random
-import aiohttp
+import os
+import requests
 import re
 
-async def execute_comfy_generation_dispatch(pipe_instance, target_host: str, base_http: str, full_positive: str, full_negative: str, current_state: dict) -> str:
-    """Compiles the dynamic graph node dictionary map payload, establishes websocket connections, and decodes final media buffers."""
+class ComfyDispatcher:
+	def __init__(self, target_host="10.0.0.64", target_port=8189):
+		self.server_address = f"{target_host}:{target_port}"
+		self.client_id = "neptune_body_agent"
 
-    meta_cache = current_state.get("meta", {})
-    last_rendered_canvas = meta_cache.get("last_visual_canvas", "example.png")
-    
-    # Evaluate if this execution pass is a standard text-to-image run or an active image modification pass
-    denoise_val = meta_cache.get("last_denoise_override", 1.0)
-    is_image_to_image = denoise_val < 1.0
+	def format_ksampler_workflow(self, workflow_template: dict, prompt_tokens: dict) -> dict:
+		"""
+		Maps tokens directly into your custom StringConcatenate graph layout.
+		Injects the visual parameters into Node 16 and front-loads negative 
+		electronic filters into Node 8.
+		"""
+		graph = json.loads(json.dumps(workflow_template))
+		
+		# 1. Inject Dynamic Positional Tokens into PrimitiveString (Node 16)
+		if "16" in graph and graph["16"].get("class_type") == "PrimitiveString":
+			graph["16"]["inputs"]["value"] = prompt_tokens["positive_tokens"]
+			
+		# 2. Prepend electronic filters into the negative StringConcatenate block (Node 8)
+		if "8" in graph and graph["8"].get("class_type") == "StringConcatenate":
+			# Combine your required front-loaded filters with whatever is currently in string_b
+			existing_b = graph["8"]["inputs"].get("string_b", "")
+			filter_prefix = prompt_tokens["negative_tokens"]
+			
+			if existing_b:
+				graph["8"]["inputs"]["string_b"] = f"{filter_prefix}, {existing_b}"
+			else:
+				graph["8"]["inputs"]["string_b"] = filter_prefix
+				
+		# 3. Dynamic Seed Randomization to prevent output caching duplication
+		if "4" in graph and graph["4"].get("class_type") == "KSampler":
+			graph["4"]["inputs"]["seed"] = random.randint(10000000000000, 99999999999999)
+				
+		return graph
+	def dispatch_to_wsl(self, target_graph: dict) -> str:
+		"""Sends execution tokens to the ComfyUI API endpoint."""
+		payload = {"prompt": target_graph, "client_id": self.client_id}
+		try:
+			url = f"http://{self.server_address}/prompt"
+			response = requests.post(url, json=payload, timeout=15)
+			response.raise_for_status()
+			return response.json().get("prompt_id")
+		except requests.exceptions.RequestException as e:
+			print(f"[Core Error] Remote asset generation pipeline unreachable on WSL node: {e}")
+			return None
 
-    # 🗜️ METICULOUSLY ALIGNED TYPE-STRICT COMFYUI PRODUCTION GRAPH OBJECT
-    comfy_workflow = {
-        "1": {
-            "inputs": {
-                "ckpt_name": "ponyRealism_v22MainVAE.safetensors"
-            },
-            "class_type": "CheckpointLoaderSimple",
-            "_meta": {"title": "Load Checkpoint"}
-        },
-        "4": {
-            "inputs": {
-                "seed": random.randint(100000000000, 999999999999),
-                "steps": 20,
-                "cfg": 4,
-                "sampler_name": "dpmpp_2m",
-                "scheduler": "karras",
-                "denoise": denoise_val,
-                "model": ["1", 0],
-                "positive": ["10", 0],
-                "negative": ["11", 0],
-                "latent_image": ["19", 0]
-            },
-            "class_type": "KSampler",
-            "_meta": {"title": "KSampler"}
-        },
-        "5": {
-            "inputs": {
-                "samples": ["4", 0],
-                "vae": ["1", 2]
-            },
-            "class_type": "VAEDecode",
-            "_meta": {"title": "VAE Decode"}
-        },
-        "7": {
-            "inputs": {
-                "string_a": ["16", 0],
-                "string_b": "3d game asset mesh, square enix cgi style, final fantasy vii remake style, video game graphics, crisp clean unreal engine 5 render, smooth digital skin textures, highly detailed 3d polygonal model, ambient occlusion, depth of field, professional cinematic studio lighting",
-                "delimiter": ", "
-            },
-            "class_type": "StringConcatenate",
-            "_meta": {"title": "Concatenate Text"}
-        },
-        "8": {
-            "inputs": {
-                "string_a": "photorealistic, real human skin texture, pores, freckles, real life person, cosplayer photograph, hyper-realistic, score_4, score_5, score_6, lowres, worst quality, low quality, 2d anime, flat colors, lineart, drawing, illustration, cartoon, deformed hands, extra fingers, missing fingers, extra limbs, multiple views, duplicate character, out of focus, blurry, dirt",
-                "string_b": full_negative,
-                "delimiter": ", "
-            },
-            "class_type": "StringConcatenate",
-            "_meta": {"title": "Concatenate Text"}
-        },
-        "9": {
-            "inputs": {
-                "filename_prefix": "neptune_render",
-                "images": ["5", 0]
-            },
-            "class_type": "SaveImage",
-            "_meta": {"title": "Save Image"}
-        },
-        "10": {
-            "inputs": {
-                "width": 832,
-                "height": 832,
-                "crop_w": 0,
-                "crop_h": 0,
-                "target_width": 832,
-                "target_height": 832,
-                "text_g": ["7", 0],
-                "text_l": ["7", 0],
-                "clip": ["1", 1]
-            },
-            "class_type": "CLIPTextEncodeSDXL",
-            "_meta": {"title": "Node 3"}
-        },
-        "11": {
-            "inputs": {
-                "width": 832,
-                "height": 832,
-                "crop_w": 0,
-                "crop_h": 0,
-                "target_width": 832,
-                "target_height": 832,
-                "text_g": ["8", 0],
-                "text_l": ["8", 0],
-                "clip": ["1", 1]
-            },
-            "class_type": "CLIPTextEncodeSDXL",
-            "_meta": {"title": "Node 21"}
-        },
-        "16": {
-            "inputs": {
-                "value": full_positive
-            },
-            "class_type": "PrimitiveString",
-            "_meta": {"title": "Text"}
-        },
-        "17": {
-            "inputs": {
-                "source": ["7", 0]
-            },
-            "class_type": "PreviewAny",
-            "_meta": {"title": "Preview as Text"}
-        }
-    }
+	def cache_backchannel_variant(self, local_image_path: str, filename_string: str) -> bool:
+		"""
+		Asset Sync Loop Step: Bypasses client output routes to stream variants 
+		straight into ComfyUI's input cache directory via raw sanitized strings.
+		"""
+		sanitized_filename = re.sub(r"[^\w\-_.]", "_", filename_string)
+		url = f"http://{self.server_address}/upload/image"
+		
+		if not os.path.exists(local_image_path):
+			return False
+			
+		try:
+			with open(local_image_path, "rb") as f:
+				files = {"image": (sanitized_filename, f, "image/png")}
+				data = {"overwrite": "true"}
+				res = requests.post(url, files=files, data=data, timeout=20)
+				return res.status_code == 200
+		except Exception as e:
+			print(f"[Sync Error] Back-channel cache injection dropped: {e}")
+			return False
 
-    # =========================================================================
-    # DYNAMIC LATENT CANVAS CONFIGURATION LAYER
-    # =========================================================================
-    if is_image_to_image:
-        # Image modification active: Ingest file layout from cache via VAEEncode
-        comfy_workflow["18"] = {
-            "inputs": {"image": last_rendered_canvas},
-            "class_type": "LoadImage",
-            "_meta": {"title": "Load Image"}
-        }
-        comfy_workflow["19"] = {
-            "inputs": {"pixels": ["18", 0], "vae": ["1", 2]},
-            "class_type": "VAEEncode",
-            "_meta": {"title": "VAE Encode"}
-        }
-    else:
-        # Standard execution loop: Generate a clean latent space from scratch
-        comfy_workflow["19"] = {
-            "inputs": {"width": 832, "height": 832, "batch_size": 1},
-            "class_type": "EmptyLatentImage",
-            "_meta": {"title": "Empty Latent Image"}
-        }
-    try:
-        base_ws, client_id = f"ws://{target_host}:8189/ws", str(uuid.uuid4())
-        timeout = aiohttp.ClientTimeout(total=90.0)
-        
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            # 1. Establish live websocket synchronization channel with the GPU host node
-            async with session.ws_connect(f"{base_ws}?clientId={client_id}") as ws:
-                # Submit compiled production workflow execution payload packet
-                async with session.post(f"{base_http}/prompt", json={"prompt": comfy_workflow, "client_id": client_id}) as response:
-                    if response.status != 200:
-                        return f"wahh senpai! ComfyUI worker node rejected the pipeline generation matrix: {await response.text()}"
-                    res_data = await response.json()
-                    target_prompt_id = res_data.get("prompt_id")
+	def execute_render_pipeline(self, compiler_output: dict, template_path: str) -> dict:
+		"""Connects our PipelineCompiler results directly to active ComfyUI worker loops."""
+		if not os.path.exists(template_path):
+			return {"status": "failed", "reason": "Workflow blueprint file missing"}
+			
+		with open(template_path, "r", encoding="utf-8") as f:
+			workflow_raw = json.load(f)
 
-                # 2. Block and read server thread events until execution finishes
-                async for msg in ws:
-                    if msg.type == aiohttp.WSMsgType.TEXT:
-                        data = json.loads(msg.data)
-                        if data.get("type") == "executing" and data.get("data", {}).get("node") is None and data.get("data", {}).get("prompt_id") == target_prompt_id:
-                            break
-                    elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
-                        break
-
-            # 3. Pull transaction history record payload entries
-            async with session.get(f"{base_http}/history/{target_prompt_id}") as history_res:
-                if history_res.status == 200:
-                    hist_data = await history_res.json()
-                    prompt_output = hist_data.get(target_prompt_id, {}).get("outputs", {})
-                    found_image_filename, subfolder = "", ""
-                    
-                    for node_id in sorted(prompt_output.keys(), key=int, reverse=True):
-                        node_data = prompt_output[node_id]
-                        if "images" in node_data and isinstance(node_data["images"], list) and len(node_data["images"]) > 0:
-                            img_meta = node_data["images"][0]
-                            found_image_filename = img_meta.get("filename", "")
-                            subfolder = img_meta.get("subfolder", "")
-                            if found_image_filename: break
-
-                    if found_image_filename:
-                        # Store the new file pointer name back to persistent memory cache records
-                        current_state.setdefault("meta", {})["last_visual_canvas"] = found_image_filename
-                        from neptune.mind.sysadmin.sysadmin_core import save_neptune_state
-                        await save_neptune_state(base_http, current_state)
-
-                        # 5. Asynchronously stream finished image binary blocks down the link
-                        file_url = f"{base_http}/view?filename={found_image_filename}&subfolder={subfolder}&type=output"
-                        async with session.get(file_url) as img_res:
-                            if img_res.status == 200:
-                                img_bytes = await img_res.read()
-                                base64_encoded = base64.b64encode(img_bytes).decode("utf-8")
-                                data_uri = f"data:image/png;base64,{base64_encoded}"
-                                
-                                diag_path = "/app/backend/data/neptune/repository/neptune_dialog_repository.json"
-                                try:
-                                    with open(diag_path, 'r') as df:
-                                        repo = json.load(df)
-                                    msg_pool = repo.get("default_delivery", {}).get("selfie", ["Here's your picture!"])
-                                    msg_text = random.choice(msg_pool)
-                                except Exception:
-                                    msg_text = "Snap secured! 📸 Hope this view {location_text} coordinates nicely with your expectations, senpai! 💜"
-
-                                # =========================================================================
-                                # DYNAMIC TEMPLATE PLACEHOLDER PARSING ENGINE
-                                # =========================================================================
-                                env_data = current_state.get("environment", {})
-                                wet_state = env_data.get("wet_state", "dry")
-                                
-                                # Resolve dynamic location context string
-                                if wet_state == "wet":
-                                    location_string = "from inside the shower"
-                                else:
-                                    location_string = "here in my room"
-
-                                # Safely patch text leaks
-                                msg_text = msg_text.replace("{location_text}", location_string)
-                                msg_text = re.sub(r'\s+', ' ', msg_text).strip() # Scrub double spaces layout issues
-
-                                return f"![Neptune Physical Asset Render]({data_uri})\n\n{msg_text}"
-
-        return "wahh senpai! Media pipeline transaction completed but asset tracking was dropped down the pipeline conduit... :c"
-    except Exception as e:
-        return f"wahh senpai! The Physical Body I/O layer encountered a critical hardware handshake link crash: `{str(e)}`"
+		ready_graph = self.format_ksampler_workflow(workflow_raw, compiler_output)
+		prompt_id = self.dispatch_to_wsl(ready_graph)
+		
+		if not prompt_id:
+			return {"status": "failed", "reason": "WSL server rejected execution block"}
+			
+		return {
+			"status": "queued",
+			"prompt_id": prompt_id,
+			"assigned_location": compiler_output["target_location"],
+			"dialogue_payload": compiler_output["dialogue_payload"]
+		}

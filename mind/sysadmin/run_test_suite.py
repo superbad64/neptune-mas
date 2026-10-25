@@ -1,148 +1,101 @@
-# =========================================================================
-# UTILITIES SUB-PLANE: NEPTUNE MASTER AGENT STATE REGRESSION HARNESS
-# File Location: /var/lib/docker/volumes/open-webui/_data/neptune/mind/sysadmin/run_test_suite.py (Part 1)
-# =========================================================================
-
 import os
 import sys
+import unittest
 import json
-import time
-import asyncio
 
-# 🗺️ DYNAMIC PATH INJECTION LAYER
-current_file_dir = os.path.dirname(os.path.abspath(__file__))
-root_project_dir = os.path.abspath(os.path.join(current_file_dir, "../../.."))
+# Auto-compute the base file path location dynamically to support both host volumes and container runtimes
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+NEPTUNE_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 
-if root_project_dir not in sys.path:
-    sys.path.insert(0, root_project_dir)
+if NEPTUNE_ROOT not in sys.path:
+	sys.path.insert(0, NEPTUNE_ROOT)
 
-# 🧼 PROGRAMMATIC PRODUCTION-GRADE CONTEXT MANAGER MOCK CONDUIT
-class MockNetworkResponseContext:
-    async def __aenter__(self): return self
-    async def __aexit__(self, exc_type, exc_val, exc_tb): pass
-    @property
-    def status(self): return 200
-    async def text(self): return "mocked_response"
-    async def read(self): return b"mocked_binary_stream"
-    async def json(self): return {"prompt_id": "test_id", "outputs": {"9": {"images": [{"filename": "test.png", "subfolder": ""}]}}}
+from core.orchestrator import NeptuneOrchestrator
+from mind.inspector import NeptuneInspector
+from body.pipeline_compiler import PipelineCompiler
+from body.comfy_dispatch import ComfyDispatcher
+from soul.dialog_router import NeptuneDialogRouter
+from soul.chatter.chatter_core import NeptuneChatterCore
 
-class MockNetworkStreamContext:
-    async def __aenter__(self): return self
-    async def __aexit__(self, exc_type, exc_val, exc_tb): pass
-    def __aiter__(self): return self
-    async def __anext__(self): raise StopAsyncIteration
-    
-    # FIXED: Replaced standard lambda structures with valid async function methods
-    async def post(self, *args, **kwargs): return MockNetworkResponseContext()
-    async def get(self, *args, **kwargs): return MockNetworkResponseContext()
-    async def ws_connect(self, *args, **kwargs): return MockNetworkResponseContext()
+class TestNeptunePlatform(unittest.TestCase):
+	def setUp(self):
+		# Re-map all data endpoints dynamically using the local discoverable paths
+		self.state_path = os.path.join(NEPTUNE_ROOT, "repository", "neptune_state.json")
+		self.workflow_path = os.path.join(NEPTUNE_ROOT, "repository", "comfy_workflow_preset.json")
+		self.engine_path = os.path.join(NEPTUNE_ROOT, "repository", "neptune_photo_engine.json")
+		self.overrides_path = os.path.join(NEPTUNE_ROOT, "repository", "neptune_photo_overrides.json")
+		self.matrix_path = os.path.join(NEPTUNE_ROOT, "repository", "neptune_override_matrix.json")
+		
+		# Ensure a skeleton state exists for disk verification operations
+		if not os.path.exists(self.state_path):
+			os.makedirs(os.path.dirname(self.state_path), exist_ok=True)
+			with open(self.state_path, "w", encoding="utf-8") as f:
+				json.dump({"environment": "bed", "tops": "default"}, f)
 
-if "aiohttp" not in sys.modules:
-    from types import ModuleType
-    mock_aiohttp = ModuleType("aiohttp")
-    mock_aiohttp.ClientSession = lambda *args, **kwargs: MockNetworkStreamContext()
-    mock_aiohttp.ClientTimeout = lambda *args, **kwargs: None
-    mock_aiohttp.FormData = lambda *args, **kwargs: None
-    sys.modules["aiohttp"] = mock_aiohttp
+		self.inspector = NeptuneInspector(self.engine_path, self.overrides_path, self.matrix_path)
+		self.compiler = PipelineCompiler(self.engine_path, self.overrides_path, self.state_path)
+		self.dispatcher = ComfyDispatcher()
+		self.chatter = NeptuneChatterCore()
+		self.router = NeptuneDialogRouter(self.inspector, self.chatter, self.matrix_path, self.state_path)
+		
+		self.orchestrator = NeptuneOrchestrator(
+			self.inspector, self.compiler, self.dispatcher, self.router, self.state_path
+		)
+	def test_01_inter_core_communication(self):
+		"""Verifies that basic text can route completely through the global orchestration layers."""
+		res = self.orchestrator.process_agent_turn("Hello Neptune", self.workflow_path)
+		self.assertIsNotNone(res.get("output_response"))
 
-class MockValvesObject:
-    desktop_ollama_raw = "10.0.0.64"
-    active_character_profile = "Neptune v1"
+	def test_02_sysadmin_super_overrides(self):
+		"""Triggers a hard-token sysadmin event to test caching cleanup routing loops."""
+		res = self.orchestrator.process_agent_turn("Execute Proxmox container cache purge", self.workflow_path)
+		self.assertEqual(res.get("route_type"), "sysadmin_override")
 
-def read_live_state_file() -> dict:
-    """Helper method to pull the absolute real-time state array database straight from disk cache records."""
-    state_path = "/var/lib/docker/volumes/open-webui/_data/neptune/repository/neptune_state.json"
-    try:
-        with open(state_path, 'r') as sf: return json.load(sf)
-    except Exception: return {}
+	def test_03_generate_baseline_desk_picture(self):
+		"""Forces a baseline generation scenario at her desk to test core workflow compilation."""
+		self.orchestrator._update_state_matrix({"environment": "desk"})
+		res = self.orchestrator.process_agent_turn("Take a photo of me right now", self.workflow_path)
+		self.assertEqual(res.get("route_type"), "standard_chat")
+	def test_04_individual_wardrobe_mutations(self):
+		"""Mutates single relational garment pieces and verifies data persistence integrity."""
+		self.orchestrator._update_state_matrix({"tops": "black oversized hoodie"})
+		with open(self.state_path, "r", encoding="utf-8") as f:
+			state = json.load(f)
+		self.assertEqual(state.get("tops"), "black oversized hoodie")
 
-async def execute_automated_test_suite():
-    print("=========================================================================")
-    print("🚀 INITIALIZING NEPTUNE STATE REGRESSION & PERFORMANCE VALIDATION SUITE...")
-    print("=========================================================================")
-    
-    for module in list(sys.modules.keys()):
-        if "neptune" in module and "run_test_suite" not in module: del sys.modules[module]
+	def test_05_generate_backchannel_variant_edit(self):
+		"""Verifies visual parameters generate correctly for clean Node 16 primitives."""
+		self.orchestrator._update_state_matrix({"tops": "white lace crop top"})
+		payload = self.compiler.compile_generation_payload()
+		self.assertIsNotNone(payload.get("positive_tokens"))
 
-    from neptune.core.orchestrator import Pipe
-    orchestrator = Pipe()
-    orchestrator.valves = MockValvesObject()
-    failures = 0
+	def test_06_full_outfit_swap(self):
+		"""Tests full relational manifest changes across multiple slots concurrently."""
+		outfit_mutation = {"tops": "leather jacket", "bottoms": "pleated skirt"}
+		self.orchestrator._update_state_matrix(outfit_mutation)
+		with open(self.state_path, "r", encoding="utf-8") as f:
+			state = json.load(f)
+		self.assertEqual(state.get("bottoms"), "pleated skirt")
+	def test_07_mirror_location_with_mutex_expression(self):
+		"""Validates mirror constraint bounds and checks facial expression trigger exclusivity."""
+		payload = self.compiler.compile_generation_payload(user_input="give me an ahegao look", force_location="mirror")
+		self.assertEqual(payload["target_location"], "mirror")
+		self.assertIn("mirror reflection selfie shot", payload["positive_tokens"])
+		self.assertIn("eyes rolling back", payload["positive_tokens"])
 
-    # =========================================================================
-    # PHASE 1: ARITHMETIC COOLING & TIME DECAY REGRESSION TEST
-    # =========================================================================
-    print("\n⏳ [TEST PHASE 1]: Validating Chronological Arousal Time-Decay Calculations...")
-    
-    state_cache = read_live_state_file()
-    state_cache.setdefault("arousal", {})["level"] = 1.0
-    state_cache.setdefault("meta", {})["last_interaction_timestamp"] = time.time() - 3600.0
-    
-    state_path = "/var/lib/docker/volumes/open-webui/_data/neptune/repository/neptune_state.json"
-    with open(state_path, 'w') as sf: json.dump(state_cache, sf, indent=4)
-
-    synthetic_payload = {"messages": [{"role": "user", "content": "Hello Neptune!"}]}
-    try: await orchestrator.pipe(synthetic_payload)
-    except Exception: pass
-    
-    mutated_state = read_live_state_file()
-    decayed_level = float(mutated_state.get("arousal", {}).get("level", 1.0))
-    
-    if decayed_level < 1.0:
-        print(f"   ✅ [PASSED]: Exponential cooling math verified. Level decreased from 1.0 down to: {decayed_level}")
-    else:
-        print("   ❌ [FAILED]: Arousal tracking level remained completely frozen at 1.0 over a 1-hour interaction gap!")
-        failures += 1
-    # =========================================================================
-    # PHASE 2: MUTATION BOUNDARY PERSISTENCE CHECK
-    # =========================================================================
-    print("\n👗 [TEST PHASE 2]: Validating Inventory Mutation Gate Synchronization...")
-    
-    # Seeding her state to naked first to cleanly measure if she successfully equips the target item
-    state_cache = read_live_state_file()
-    state_cache.setdefault("wardrobe", {})["bottom"] = "naked"
-    state_path = "/var/lib/docker/volumes/open-webui/_data/neptune/repository/neptune_state.json"
-    with open(state_path, 'w') as sf: json.dump(state_cache, sf, indent=4)
-
-    # Trigger a garment query targeting an absolute system fallback item (Tifa Skirt)
-    equip_payload = {"messages": [{"role": "user", "content": "Put on the tifa skirt"}]}
-    try: await orchestrator.pipe(equip_payload)
-    except Exception: pass
-    
-    mutated_state = read_live_state_file()
-    active_clothing = mutated_state.get("wardrobe", {}).get("bottom", "naked")
-    
-    if "tifa_skirt" in active_clothing.lower():
-        print(f"   ✅ [PASSED]: Wardrobe persistence verified. Bottom cache correctly registered: '{active_clothing}'")
-    else:
-        print(f"   ❌ [FAILED]: State file read mismatch! Bottom slot returned unexpected data layer pointer: '{active_clothing}'")
-        failures += 1
-
-    # =========================================================================
-    # PHASE 3: VOLATILE INTERCEPT LAYER SWEEP (OVERRIDE SCRUBBING ASSERTION)
-    # =========================================================================
-    print("\n📸 [TEST PHASE 3]: Validating Volatile Camera Overlay Injections & State Clear Loops...")
-    
-    override_payload = {"messages": [{"role": "user", "content": "Show me your breasts"}]}
-    try: await orchestrator.pipe(override_payload)
-    except Exception: pass
-    
-    mutated_state = read_live_state_file()
-    post_override_arousal = float(mutated_state.get("arousal", {}).get("level", 0.0))
-    
-    if post_override_arousal == 1.0:
-        print(f"   ✅ [PASSED]: Volatile logic verified. Arousal spiked to 1.0 and physical markers updated.")
-    else:
-        print(f"   ❌ [FAILED]: Arousal level failed to register explicit tracking threshold. Level: {post_override_arousal}")
-        failures += 1
-
-    print("\n=========================================================================")
-    if failures == 0:
-        print("🎉 ALL PLATFORM SYSTEMS FULLY VERIFIED, INTEGRATED, & STANDALONE BOUNDED!")
-        sys.exit(0)
-    else:
-        print(f"🚨 TESTING COMPLETED: DETECTED {failures} CORE REGRESSION DEFECT ANOMALIES.")
-        sys.exit(1)
+	def test_08_sequential_override_sweep(self):
+		"""Sweeps through every explicit photo override trigger key to ensure zero token collisions."""
+		override_triggers = [
+			"lift your shirt", 
+			"show me your tits", 
+			"show me your pussy", 
+			"show me your feet", 
+			"show me your ass", 
+			"take a shower"
+		]
+		for trigger in override_triggers:
+			res = self.orchestrator.process_agent_turn(trigger, self.workflow_path)
+			self.assertIn(res.get("route_type"), ["lewd_photo_override", "general_photo_engine"])
 
 if __name__ == "__main__":
-    asyncio.run(execute_automated_test_suite())
+	unittest.main()

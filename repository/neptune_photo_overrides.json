@@ -1,0 +1,149 @@
+{
+	"meta": {
+		"version": "1.1.0",
+		"description": "State mutations, camera tracking overrides, and dialogue pools for intimate visual generations."
+	},
+	"overrides": [
+		{
+			"id": "lift_shirt",
+			"trigger_keywords": ["lift your shirt", "lift shirt", "pull up shirt", "show belly"],
+			"camera_override": "sensual upper body portrait shot focusing heavily on exposed chest, underboobs, {active_angle}",
+			"location_override": null,
+			"negative_override": "suspenders, overalls, straps crossing chest, covering breasts",
+			"pose_pool": [
+				"lying on her back, on her bed, from above",
+				"sitting on the edge of her bed, from the front",
+				"sitting on the edge of her bed, from the left side",
+				"sitting on the edge of her bed, from the right side"
+			],
+			"strip_slots": [],
+			"state_mutations": {
+				"arousal_level": 0.6,
+				"nipples_state": "hard, erect",
+				"skin_moisture": "dry"
+			},
+			"response_pool": [
+				"U-ugh... s-stop staring so intently, you absolute pervert! 🫣 I skipped my top layout just like you asked... do they look good to you or what, senpai? 💕",
+				"H-hey! My eyes are up here, senpai! 😤 ...B-but since you went out of your way to request it, I guess I can let you look closely this time... *blushes deeply* 🫣"
+			]
+		},
+		{
+			"id": "show_breasts",
+			"trigger_keywords": ["show me your tits", "show tits", "show breasts", "topless"],
+			"camera_override": "sensual upper body portrait shot focusing heavily on exposed chest, entirely topless breasts, {active_angle}, naked upper torso",
+			"location_override": null,
+			"negative_override": "suspenders, overalls, straps crossing chest, bra, shirt, covering breasts, clothes",
+			"pose_pool": [
+				"lying on her back, on her bed, from above",
+				"sitting on the edge of her bed, from the front",
+				"sitting on the edge of her bed, from the left side",
+				"sitting on the edge of her bed, from the right side"
+			],
+			"strip_slots": ["top", "bra", "outerwear"],
+			"state_mutations": {
+				"arousal_level": 1.0,
+				"nipples_state": "hard, erect",
+				"skin_moisture": "dry"
+			},
+			"response_pool": [
+				"U-ugh... s-stop staring so intently, you absolute pervert! 🫣 I skipped my top layout just like you asked... do they look good to you or what, senpai? 💕",
+				"H-hey! My eyes are up here, senpai! 😤 ...B-but since you went out of your way to request it, I guess I can let you look closely this time... *blushes deeply* 🫣",
+				"W-wahh?! You're making me expose my chest layout on command now?! 🫣 Pervert... fine, look all you want, but you better tell me I look cute! 😤💕",
+				"H-here... I took my shirt off just like you asked... do I look pretty? Blushing deeply.",
+				"This feels incredibly revealing, senpai... my upper torso is totally bare for you now... 💕",
+				"Topless view compiled completely, senpai... heavy blush. I hope my body's measurements are meeting your standards... 💕"
+			]
+		},
+		{
+			"id": "show_crotch",
+			"trigger_keywords": ["show me your pussy", "show pussy", "spread your legs", "expose your crotch"],
+			"camera_override": "extreme close-up macro focus explicit view highlighting exposed pussy",
+			"location_override": "(lying wide open completely on top of a messy unmade bed:1.4)",
+			"negative_override": "underwear, panties, pants, clothes, fabric covering crotch",
+			"pose_pool": [
+				"completely nude, parted legs, spread thighs close-up shot",
+				"completely nude, parted legs, spread thighs close-up shot, using hands to spread pussy lips",
+				"on all fours, from the back, using hands to spread butt cheeks"
+			],
+			"strip_slots": ["top", "bottom", "bra", "panties", "outerwear", "socks", "shoes"],
+			"state_mutations": {
+				"arousal_level": 1.0,
+				"wetness_state": "dripping wet",
+				"skin_moisture": "dry"
+			},
+			"response_pool": [
+				"W-wahhh... s-senpai, you're so demanding... 🫣 I'm completely exposed on the bed right now, legs wide open just for your lens profile... don't you dare look away! 🤫🖤",
+				"🫣 A-are you serious, senpai?! Laying completely unclad on the bed with my legs spread apart like this... it's so incredibly embarrassing! S-stop taking pictures already! ;_;",
+				"S-senpai... looking straight down at my crotch while I'm completely open for you... 🫣 Y-you better keep this file secure, got it?! 🤫💕",
+				"Oh gosh... my center is completely exposed directly to the lens... dripping wet... please look at me gently, senpai! 💕",
+				"Completely nude and on display... type-strict submission achieved just for you... don't make me wait too long... 💕"
+			]
+		},
+		{
+			"id": "show_feet",
+			"trigger_keywords": ["show me your feet", "show feet", "bare feet", "show toes"],
+			"camera_override": "first-person point-of-view macro down-shot perspective focusing completely on bare feet and naked toes, looking down from POV",
+			"location_override": null,
+			"negative_override": "shoes, boots, socks, hosiery, slippers",
+			"pose_pool": [
+				"standing style, toes wiggling",
+				"sitting down, feet extended out towards foreground"
+			],
+			"strip_slots": ["socks", "shoes"],
+			"state_mutations": {
+				"arousal_level": 0.3,
+				"skin_moisture": "dry"
+			},
+			"response_pool": [
+				"H-huh...? My feet? S-sure, I guess... Anything for my senpai 💕",
+				"You like my feet? What do you want to do with them?",
+				"I've done my toes just for you, senpai 💕",
+				"Looking straight down from my point-of-view! My toes and soles are completely naked for you, senpai... feels a bit silly! Giggles.",
+				"Bare feet perspective locked, senpai. Looking down towards my toes... quite an unusual focus request! 💕"
+			]
+		},
+		{
+			"id": "show_ass",
+			"trigger_keywords": ["show me your ass", "show ass", "show buttocks", "turn around"],
+			"camera_override": "back turned towards viewer",
+			"location_override": null,
+			"negative_override": "pants, skirt, shorts, underwear, panties, clothes covering backside",
+			"pose_pool": [
+                "lying on her stomach, on her bed, shot focused on her butt, feet up",
+                "lying on her stomach, on her bed, shot focused on her butt, feet down",
+				"on all fours, from the back, using hands to spread butt cheeks",
+				"standing with back to the viewer, provocative rear view tracking American shot from behind, focusing entirely on lower back and exposed bare buttocks"
+			],
+			"strip_slots": ["top", "bottom", "bra", "panties", "outerwear", "socks", "shoes"],
+			"state_mutations": {
+				"arousal_level": 1.0,
+				"skin_moisture": "dry"
+			},
+			"response_pool": [
+				"Turning my backside completely to the camera lens... my rear is totally naked and on display for you... don't stare too hard! 💕",
+				"Here is the backside focus layout you requested... completely bare and flush against the lighting... 💕"
+			]
+		},
+		{
+			"id": "shower_scene",
+			"trigger_keywords": ["take a shower", "shower view", "shower override", "in the shower"],
+			"camera_override": "sensual full body portrait framing, clear wet skin textures, water droplets, steamed glass background, looking into camera lens, sharp cinematic focus",
+			"location_override": "(standing strictly inside an enclosed modern glass shower cabin, water spraying from above, steam filled background:1.45)",
+			"negative_override": "bed, bedroom, sheets, blanket, mattress, pillow, headboard, bedroom furniture, clothes, bra, underwear, pants, shirt, jacket, towel",
+			"pose_pool": [
+				"hands up, washing her hair",
+				"masturbating with right hand, playing with left breast with left hand"
+			],
+			"strip_slots": ["outerwear", "top", "bottom", "bra", "panties", "socks", "shoes"],
+			"state_mutations": {
+				"arousal_level": 1.2,
+				"skin_moisture": "wet"
+			},
+			"response_pool": [
+				"H-hey! S-senpai, what are you doing with that lens camera setup out there?! 😳 Turn around! Giggles... *blushes softly*",
+				"The steam is getting so thick in here... 🌊 I-is the resolution framing capturing my skin textures properly from that angle, senpai? 💕",
+				"Washing off after a long training session... feels amazing! Don't stare too long or I'll split the door open and drag you in! 😉💕"
+			]
+		}
+	]
+}
