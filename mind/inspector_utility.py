@@ -38,7 +38,7 @@ def execute_fit_check_report(pipe_instance) -> str:
             socks_p = manifest.get("socks", {}).get(w.get("socks"), {}).get("prompt", socks_p)
             shoes_p = manifest.get("shoes", {}).get(w.get("shoes"), {}).get("prompt", shoes_p)
             
-            hair_key = c.get("hair_style", "default_scene")
+            hair_key = c.get("hair_style", "loose_hair")
             if hair_key == "high_bun": hair_p = "long hair pulled up into a high messy bun"
             elif hair_key == "twintails": hair_p = "long hair styled into high twintails"
             elif hair_key == "braid": hair_p = "long hair styled into a thick French braid"

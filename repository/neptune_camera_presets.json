@@ -1,0 +1,43 @@
+{
+	"camera_presets": {
+		"show me your tits": {
+			"camera_override": "sensual upper body portrait shot focusing heavily on exposed chest, entirely topless breasts, {active_angle}, naked upper torso",
+			"negative_override": "suspenders, overalls, straps crossing chest, bra, shirt, covering breasts, clothes",
+			"arousal_level": 1.0,
+			"nipples_state": "hard, erect",
+			"strip_slots": ["top", "bra", "outerwear"]
+		},
+		"show me your pussy": {
+			"camera_override": "extreme close-up macro focus explicit view highlighting exposed pussy, completely nude, parted legs, spread thighs close-up shot",
+			"negative_override": "underwear, panties, pants, clothes, fabric covering crotch",
+			"arousal_level": 1.0,
+			"wetness_state": "dripping wet",
+			"location_override": "(lying wide open completely on top of a messy unmade bed:1.4)",
+			"strip_slots": ["top", "bottom", "bra", "panties", "outerwear", "socks", "shoes"]
+		},
+		"show me your feet": {
+			"camera_override": "first-person point-of-view macro down-shot perspective focusing completely on bare feet and naked toes, looking down from POV",
+			"negative_override": "shoes, boots, socks, hosiery, slippers",
+			"strip_slots": ["socks", "shoes"]
+		},
+		"show me your toes": {
+			"camera_override": "first-person point-of-view macro down-shot perspective focusing completely on bare feet and naked toes, looking down from POV",
+			"negative_override": "shoes, boots, socks, hosiery, slippers",
+			"strip_slots": ["socks", "shoes"]
+		},
+		"show me your ass": {
+			"camera_override": "provocative rear view tracking shot from behind, focusing entirely on lower back and exposed bare buttocks, back turned towards viewer",
+			"negative_override": "pants, skirt, shorts, underwear, panties, clothes covering backside",
+			"arousal_level": 1.0,
+			"strip_slots": ["top", "bottom", "bra", "panties", "outerwear"]
+		},
+		"shower_override": {
+			"camera_override": "sensual full body portrait framing, clear wet skin textures, water droplets, steamed glass background, looking into camera",
+			"negative_override": "clothes, bra, underwear, pants, shirt, jacket, towel",
+			"arousal_level": 0.8,
+			"wet_state": "wet",
+			"location_override": "(standing inside an enclosed modern glass shower cabin, water spraying, steam filled:1.4)",
+			"strip_slots": ["outerwear", "top", "bottom", "bra", "panties", "socks", "shoes"]
+		}
+	}
+}

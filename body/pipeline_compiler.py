@@ -32,7 +32,7 @@ async def trigger_body_render(pipe_instance, raw_user_query: str, messages: list
             "outerwear": "naked"
         },
         "cosmetics": {
-            "hair_style": "default_scene", "makeup": "default_makeup",
+            "hair_style": "loose_hair", "makeup": "default_makeup",
             "nails": "default_nails", "piercings": "default_piercings"
         },
         "performance": {"body_pose": "default_pose", "expression": "default_expression"},
@@ -108,7 +108,7 @@ async def trigger_body_render(pipe_instance, raw_user_query: str, messages: list
     pm["pose"] = random.choice(pose_repo.get("standing_poses", ["standing casually looking forward"]))
 
     # Compile hairstyle strings dynamically based on selected configurations
-    hair_key = cosmetics.get("hair_style", "default_scene")
+    hair_key = cosmetics.get("hair_style", "loose_hair")
     if hair_key == "high_bun":
         raw_hair = "long hair pulled up into a high messy bun, stray strands framing the face"
     elif hair_key == "high_ponytail":

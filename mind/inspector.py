@@ -83,6 +83,7 @@ async def evaluate_outfit_interception(raw_query: str, current_state: dict) -> t
         f"• **Socks / Hosiery:** {wardrobe.get('socks', 'naked').replace('_', ' ').title()}",
         f"• **Footwear:** {wardrobe.get('shoes', 'naked').replace('_', ' ').title()}",
     ]
+    
     acc_list = wardrobe.get("accessories", [])
     if isinstance(acc_list, list) and acc_list:
         clean_accs = ", ".join([a.replace('_', ' ').title() for a in acc_list])
@@ -91,7 +92,7 @@ async def evaluate_outfit_interception(raw_query: str, current_state: dict) -> t
         lines.append(f"• **Accessories:** None equipped")
 
     lines.append(f"• **Jewelry Accents:** {wardrobe.get('jewelry', 'none').replace('_', ' ').title()}")
-    lines.append(f"• **Active Hairstyle:** {cosmetics.get('hair_style', 'default_scene').replace('_', ' ').title()}")
+    lines.append(f"• **Active Hairstyle:** {cosmetics.get('hair_style', 'loose_hair').replace('_', ' ').title()}")
     
     full_report_output = "\n".join(lines)
     return True, full_report_output
@@ -126,7 +127,6 @@ async def process_wardrobe_mutations_and_routing(pipe_instance, raw_query: str, 
     # 2.5. Strict Word-Boundary Reshoot Routing
     reshoot_phrases = triggers.get("reshoot_triggers", ["reshoot", "take it again"])
     is_strict_reshoot = any(re.search(r'\b' + re.escape(phrase) + r'\b', clean_query) for phrase in reshoot_phrases)
-    if_strict_reshoot = is_strict_reshoot  # safety padding alias
     if is_strict_reshoot:
         from neptune.body.reshoot_worker import execute_physical_image_reshoot
         reshoot_render_markdown = await execute_physical_image_reshoot(pipe_instance, raw_query, [], current_state)
@@ -152,23 +152,34 @@ async def process_wardrobe_mutations_and_routing(pipe_instance, raw_query: str, 
         wardrobe["jewelry"] = "none"
         state_mutated = True
 
-    # BRANCH B: EQUIP COMMANDS ("PUT ON")
+    # =========================================================================
+    # BRANCH B: EQUIP COMMANDS ("PUT ON") - DEFUZZED COMPRESSION MATCHING
+    # =========================================================================
     elif any(k in clean_query for k in m_triggers.get("equip_keywords", [])):
         outfits_pool = manifest.get("outfits", {})
         outfit_found = None
         
-        # Apply your specified "s" token replacement rule to handle possessives cleanly
-        sanitized_query = clean_query.replace("'s", "s").replace("s'", "s")
-        
-        for name in outfits_pool.keys():
-            outfit_data = outfits_pool[name]
-            triggers_list = outfit_data.get("triggers", [name])
+        # 🧼 DEFUZZING LAYER: Force alphanumeric compression to kill punctuation/spacing edge cases completely
+        def defuzz_string(text: str) -> str:
+            return re.sub(r"[^\w]", "", text.lower())
             
-            # Check both explicit trigger words arrays or raw manifest object key tokens
-            has_trigger_match = any(t.lower() in sanitized_query for t in triggers_list)
-            if has_trigger_match or name.lower().replace("_", " ") in sanitized_query:
+        flat_query = defuzz_string(clean_query)
+        
+        # --- PASS 1: EXACTIVE TRIGGER ARRAY DEFUZZED CHECK ---
+        for name, outfit_data in outfits_pool.items():
+            triggers_list = outfit_data.get("triggers", [])
+            # If any trigger token flattens inside our flattened query, lock it down instantly
+            if any(defuzz_string(t) in flat_query for t in triggers_list if len(t) > 2):
                 outfit_found = outfit_data
                 break
+                
+        # --- PASS 2: ROOT REGISTRY NAME DEFUZZED CHECK ---
+        if not outfit_found:
+            for name, outfit_data in outfits_pool.items():
+                flat_name = defuzz_string(name.replace("_", ""))
+                if flat_name in flat_query and len(flat_name) > 2:
+                    outfit_found = outfit_data
+                    break
         
         if outfit_found:
             items = outfit_found.get("items", outfit_found)
@@ -182,16 +193,19 @@ async def process_wardrobe_mutations_and_routing(pipe_instance, raw_query: str, 
             wardrobe["outerwear"] = "naked"
             state_mutated = True
         else:
-            for category, items_dict in manifest.items():
-                if category == "outfits": continue
-                for item_key in items_dict.keys():
-                    if item_key.lower().replace("_", " ") in sanitized_query:
-                        slot_map = {"tops": "top", "bottoms": "bottom", "bras": "bra", "panties": "panties", "socks": "socks", "shoes": "shoes", "jewelry": "jewelry", "outerwear": "outerwear"}
-                        target_slot = slot_map.get(category)
-                        if target_slot:
-                            wardrobe[target_slot] = item_key
-                            state_mutated = True
-                            break
+            # Single piece items fallback tracker
+            if not any(word in clean_query for word in ["clothes", "outfit", "gear", "suit"]):
+                for category, items_dict in manifest.items():
+                    if category == "outfits": continue
+                    for item_key in items_dict.keys():
+                        clean_item_name = item_key.lower().replace("_", " ")
+                        if clean_item_name in clean_query:
+                            slot_map = {"tops": "top", "bottoms": "bottom", "bras": "bra", "panties": "panties", "socks": "socks", "shoes": "shoes", "jewelry": "jewelry", "outerwear": "outerwear"}
+                            target_slot = slot_map.get(category)
+                            if target_slot:
+                                wardrobe[target_slot] = item_key
+                                state_mutated = True
+                                break
 
     # BRANCH C: STRIP / SWAP ACTIONS
     elif any(k in clean_query for k in m_triggers.get("strip_keywords", [])) or any(k in clean_query for k in m_triggers.get("swap_keywords", [])):
@@ -211,7 +225,7 @@ async def process_wardrobe_mutations_and_routing(pipe_instance, raw_query: str, 
 
     # BRANCH D: HAIRSTYLE DYNAMIC TRANSITIONS
     if any(k in clean_query for k in h_triggers.get("hair_down_triggers", [])):
-        cosmetics["hair_style"] = "default_scene"
+        cosmetics["hair_style"] = "loose_hair"
         state_mutated = True
     elif any(p in clean_query for p in h_triggers.get("style_prefix", [])):
         if any(b in clean_query for b in h_triggers.get("bun", [])): cosmetics["hair_style"] = "high_bun"

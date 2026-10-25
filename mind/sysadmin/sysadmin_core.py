@@ -58,7 +58,7 @@ async def execute_sysadmin_command(pipe_instance, user_query: str) -> str:
             "outerwear": "naked"
         },
         "cosmetics": {
-            "hair_style": "default_scene", "makeup": "default_makeup",
+            "hair_style": "loose_hair", "makeup": "default_makeup",
             "nails": "default_nails", "piercings": "default_piercings"
         },
         "performance": {"body_pose": "default_pose", "expression": "default_expression"},

@@ -1,6 +1,6 @@
 {
 	"outfits": {
-		"default_scene": {
+		"loose_hair": {
 			"triggers": ["default look", "default outfit", "normal clothes", "tifa clothes", "tifa look", "tifas clothes"],
 			"items": {
 				"bra": "black_cotton_bra",
@@ -55,10 +55,14 @@
 		"spy_outfit": {
 			"triggers": ["spy gear", "kims clothes", "kim clothes"],
 			"items": {
+				"bra": "naked",
+				"panties": "naked",
+				"socks": "black_socks",
 				"top": "spy_top",
 				"bottom": "cargo_pants",
 				"shoes": "formal_shoes",
-				"accessories": []
+				"accessories": [],
+				"outerwear": "naked"
 			}
 		},
 		"rabbit_hero": {
@@ -89,7 +93,7 @@
 		}
 	},
 	"hair_styles": {
-		"default_scene": {
+		"long hair": {
 			"triggers": ["long hair"],
 			"prompt": "long hair, side parted with bangs"
 		},
@@ -113,7 +117,7 @@
 	"outerwear": {
 		"blazer": {
 			"trigger": ["blazer"],
-			"prompt": "black fitted blazer"
+			"prompt": "(black suit blazer worn completely open front:1.4), (unbuttoned suit jacket:1.3)"
 		}
 	},
 	"tops": {
@@ -151,7 +155,7 @@
 		},
 		"pajamas_top": {
 			"triggers": ["pajamas top", "pjs top"],
-			"prompt": "oversized grey sweater"
+			"prompt": "oversized grey hoodie"
 		},
 		"spy_top": {
 			"triggers": ["spy top"],
@@ -174,11 +178,11 @@
 		},
 		"baggy_jeans": {
 			"triggers": ["baggy jeans", "default pants", "oversized jeans", "jeans"],
-			"prompt": "dark grey oversized baggy jeans, sagging low on hips, studded belt"
+			"prompt": "(dark grey oversized baggy jeans:1.4), sagging low on hips, studded belt"
 		},
 		"blue_jeans": {
 			"triggers": ["blue jeans", "faded jeans"],
-			"prompt": "faded blue oversized baggy jeans, sagging low on hips, studded belt"
+			"prompt": "(faded blue oversized baggy jeans:1.35), sagging low on hips, studded belt"
 		},
 		"black_skirt": {
 			"triggers": ["black skirt", "pleated skirt"],
@@ -198,7 +202,7 @@
 		},
 		"cargo_pants": {
 			"trigger": ["cargo pants"],
-			"prompt": "dark green oversized cargo pants"
+			"prompt": "(dark green cargo pants:1.35), (olive drab tactical trousers:1.2)"
 		},
 		"naked": {
 			"triggers": ["remove pants", "take off pants", "no pants", "remove skirt", "take off skirt", "no skirt", "bottomless"],
@@ -336,7 +340,7 @@
 			"prompt": "black leather gloves"
 		},
 		"red_tie": {
-			"trigger": ["red_tie"],
+			"trigger": ["red tie"],
 			"prompt": "red necktie"
 		},
 		"choker": {

@@ -77,7 +77,7 @@ class Pipe:
                 "top": "white_crop_tank", "bottom": "tifa_skirt", "shoes": "tifa_boots",
                 "accessories": ["tifa_gloves", "suspenders"], "jewelry": "teardrop_earrings", "outerwear": "naked"
             },
-            "cosmetics": {"hair_style": "default_scene", "makeup": "default_makeup", "nails": "default_nails", "piercings": "default_piercings"},
+            "cosmetics": {"hair_style": "loose_hair", "makeup": "default_makeup", "nails": "default_nails", "piercings": "default_piercings"},
             "performance": {"body_pose": "default_pose", "expression": "default_expression"},
             "environment": {"location": "inside my private room space", "wet_state": "dry"},
             "arousal": {"level": 0.0, "wetness": "dry", "nipples": "soft"},
