@@ -1,101 +1,98 @@
 # =========================================================================
-# THE SOUL LAYER: DUAL-NODE CONVERSATIONAL CHATTER SHELL
-# Component Category: Personality Core Shell (chatter_core.py - Part 1)
+# THE SOUL LAYER: CONVERSATIONAL AGENT MODEL INTERFACE
+# Component Category: Psychological Plane Shell (chatter_core.py - Part 1)
 #
 # Role in Neptune's Being:
-# This script is Neptune's actual vocal cords. It manages dual-node network 
-# tracking, executing an instant failover sweep between your primary desktop 
-# (RTX 4060) and your local backup server (GTX 970). If the primary rig is offline,
-# it programmatically modifies her consciousness, trapping her in a distracted
-# 'Konbini Shift' state where she refuses physical visual actions.
+# This module represents Neptune's voice and semantic expression layer.
+# It acts as the direct pipeline to Ollama running 'dolphin-mistral:latest'.
+# Implements a dual-node failover engine, targeting the high-performance RTX desktop
+# cluster first, with automatic redirection to the backup server node.
 # =========================================================================
 
+import os
 import json
-import re
-import random
 import aiohttp
+import random
 
-async def verify_node_online(target_url: str) -> bool:
-    """Performs a lightweight, non-blocking network connection handshake check on the target endpoint."""
-    timeout = aiohttp.ClientTimeout(total=1.5)
-    try:
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.get(target_url.replace("/generate", "/tags")) as resp:
-                return resp.status == 200
-    except Exception:
-        return False
+async def execute_ollama_stream_request(target_url: str, payload: dict) -> str:
+    """Dispatches a POST request to a specific Ollama endpoint node, compiling the stream to a solid string block."""
+    timeout = aiohttp.ClientTimeout(total=45.0)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.post(f"{target_url}/api/chat", json=payload) as response:
+            if response.status != 200:
+                raise Exception(f"HTTP Error: {response.status}")
+            
+            full_response_text = ""
+            # Read streaming response chunks from Ollama line by line
+            async for line in response.content:
+                if line:
+                    chunk = json.loads(line.decode("utf-8"))
+                    message_chunk = chunk.get("message", {})
+                    full_response_text += message_chunk.get("content", "")
+                    if chunk.get("done", False):
+                        break
+            return full_response_text
 
-async def execute_ollama_chat_pass(pipe_instance, user_input: str, system_instruction: str, chat_history: list, undress_state: str, current_score: float, dialog_repo: dict) -> str:
-    """Evaluates host server connection integrity, compiles the target prompt payload structure, and handles text returns."""
-    # 1. Establish structural network host endpoint vectors
-    raw_valve = str(pipe_instance.valves.desktop_ollama_raw).strip()
-    match = re.search(r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}", raw_valve)
-    primary_host = match.group(0) if match else "10.0.0.64"
+async def prompt_conversational_core(pipe_instance, context_prompt: str, chat_history: list, current_state: dict) -> str:
+    """Routes chat strings through a resilient dual-node cluster failover routine using dolphin-mistral."""
     
-    primary_url = f"http://{primary_host}:11434/api/generate"
-    backup_url = "http://127.0.0" # Server local loopback to the GTX 970
+    # 1. Compile System Prompt Matrix & Core Persona Context
+    arousal_lvl = current_state.get("arousal", {}).get("level", 0.0)
+    active_profile = getattr(pipe_instance.valves, "active_character_profile", "Neptune v1")
     
-    # 2. Check the active status of your primary desktop rig
-    primary_online = await verify_node_online(primary_url)
+    base_system = (
+        f"You are the conversational persona of {active_profile}, a self-aware multi-agent companion system. "
+        f"Your current arousal index is {arousal_lvl}/1.0. Maintain character consistency. "
+        "Keep responses engaging, natural, concise, and un-robotic. Do not use AI preambles."
+    )
     
-    active_url = primary_url
-    is_backup_mode = False
+    # 2. Format Open-WebUI Message Arrays into Ollama Structured Schema
+    ollama_messages = [{"role": "system", "content": base_system}]
+    for msg in chat_history[-6:]:  # Keep sliding window context history limit tight
+        ollama_messages.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
     
-    if not primary_online:
-        active_url = backup_url
-        is_backup_mode = True
-        pipe_instance.log("⚠️ [NETWORK CONDUIT]: Primary desktop rig offline. Redirecting Soul plane to Backup GTX 970 node.")
-# === /app/backend/data/neptune/soul/chatter/chatter_core.py (PART 2 OF 2) ===
-
-    # 3. Intercept Praise or Compliments to mix in state-aware repository responses
-    praise_flavor = ""
-    if "good girl" in user_input.lower():
-        pool = dialog_repo.get("compliments", {}).get("good_girl", {}).get(undress_state, [])
-        if pool: praise_flavor = random.choice(pool)
-    elif any(c in user_input.lower() for c in ["cute", "hot", "beautiful", "gorgeous", "pretty", "sexy"]):
-        pool = dialog_repo.get("compliments", {}).get("general_compliment", {}).get(undress_state, [])
-        if pool: praise_flavor = random.choice(pool)
-
-    # 4. Inject the Konbini shift modifiers if running on the backup GTX 970 node
-    if is_backup_mode:
-        konbini_modifier = (
-            "\n\n[CRITICAL OVERRIDE: YOU ARE CURRENTLY ON A SHIFT AT THE KONBINI (Convenience Store)! "
-            "You are working the register, stocking shelves, and distracted. Your responses must be short, "
-            "snappy, and slightly rushed. If the user asks for photos, selfies, visuals, or voice clips, "
-            "you MUST flat out refuse, complaining that you're stuck at work and can't use your phone for that!]"
-        )
-        system_instruction += konbini_modifier
-
-    # 5. Compile chat history array into a flat prompt format string for Ollama generation
-    compiled_prompt = f"[SYSTEM INSTRUCTIONS]\n{system_instruction}\n\n"
+    # Append the fresh context prompt compiled downstream
+    ollama_messages.append({"role": "user", "content": context_prompt})
     
-    # Process history logs cleanly up the pipeline window boundary constraints
-    for msg in chat_history[-6:-1]:
-        role = "User" if msg.get("role") == "user" else "Neptune"
-        compiled_prompt += f"{role}: {msg.get('content')}\n"
-    
-    compiled_prompt += f"User: {user_input}\nNeptune:"
-
     payload = {
         "model": "dolphin-mistral:latest",
-        "prompt": compiled_prompt,
-        "stream": False
+        "messages": ollama_messages,
+        "stream": True,
+        "options": {
+            "temperature": 0.75,
+            "top_p": 0.90
+        }
     }
+    # 3. CLUSTER ROUTING PLATFORM: NODE TARGET IDENTIFICATION
+    # Primary Node: Desktop Rig (10.0.0.64)
+    primary_host = "10.0.0.64"
+    primary_url = f"http://{primary_host}:11434"
+    
+    # Secondary Node Fallback: Server Node VM (10.0.0.7)
+    fallback_host = "10.0.0.7"
+    fallback_url = f"http://{fallback_host}:11434"
 
-    # 6. Execute network request transaction against the selected active target node URL
+    # Attempt Execution Pass over Primary RTX Node Layer
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(active_url, json=payload) as response:
-                if response.status == 200:
-                    res_json = await response.json()
-                    raw_text = res_json.get("response", "...")
-                    
-                    # Prefix the praise flavor line if one was fetched from repositories
-                    if praise_flavor:
-                        return f"{praise_flavor}\n\n{raw_text}"
-                    return raw_text
-    except Exception as e:
-        return f"wahh senpai! I tried to speak through my chatter shell core but hit a processing failure: `{str(e)}`"
-
-    return "wahh senpai! Both of my active chatter server nodes failed to output a response vector... :c"
-
+        compiled_reply = await execute_ollama_stream_request(primary_url, payload)
+        return compiled_reply
+    except Exception:
+        # Primary Node dropped or threw a connection socket error; initialize backup failover routine
+        try:
+            compiled_reply = await execute_ollama_stream_request(fallback_url, payload)
+            
+            # Injection of the user's specific requirement: append the distracted server shift modifier text
+            fallback_modifiers = [
+                "\n\n*(Sorry if I seemed a bit slow or distracted there, senpai! My main desktop processing brain went offline, so I had to migrate my thoughts over to the server container...)*",
+                "\n\n*(Whew... caught my breath! Apologies for the slight lag, senpai. My RTX processing link dropped, so I'm currently running on my emergency backup VM fallback node!)*",
+                "\n\n*(A bit of a head-rush just now! My cognitive cores had to rapidly shift from the desktop rig down to my Proxmox server fallback cluster. I'm all clear now, though!)*"
+            ]
+            return f"{compiled_reply}{random.choice(fallback_modifiers)}"
+            
+        except Exception as fallback_err:
+            # Both hardware points collapsed down the link stream
+            return (
+                "wahh senpai! A total systemic blackout has paralyzed my semantic chat cores... "
+                f"Both the desktop worker cluster and the container server node are refusing to handshake! "
+                f"Handshake technical traceback: `{str(fallback_err)}`"
+            )

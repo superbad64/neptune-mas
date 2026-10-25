@@ -212,7 +212,23 @@ async def execute_comfy_generation_dispatch(pipe_instance, target_host: str, bas
                                     msg_pool = repo.get("default_delivery", {}).get("selfie", ["Here's your picture!"])
                                     msg_text = random.choice(msg_pool)
                                 except Exception:
-                                    msg_text = "Here is the picture selfie you requested, senpai! 💕"
+                                    msg_text = "Snap secured! 📸 Hope this view {location_text} coordinates nicely with your expectations, senpai! 💜"
+
+                                # =========================================================================
+                                # DYNAMIC TEMPLATE PLACEHOLDER PARSING ENGINE
+                                # =========================================================================
+                                env_data = current_state.get("environment", {})
+                                wet_state = env_data.get("wet_state", "dry")
+                                
+                                # Resolve dynamic location context string
+                                if wet_state == "wet":
+                                    location_string = "from inside the shower"
+                                else:
+                                    location_string = "here in my room"
+
+                                # Safely patch text leaks
+                                msg_text = msg_text.replace("{location_text}", location_string)
+                                msg_text = re.sub(r'\s+', ' ', msg_text).strip() # Scrub double spaces layout issues
 
                                 return f"![Neptune Physical Asset Render]({data_uri})\n\n{msg_text}"
 

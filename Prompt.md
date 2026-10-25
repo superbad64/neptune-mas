@@ -61,22 +61,4 @@ We've separated Neptune's Mind (skill-oriented sub-router; contains Sysadmin and
     └── neptune_dialog_repository.json		# State-of-undress conversational flavor text pool
 ```
 
-Where we stopped: Yet more comfyUI woes.
-
-
-🚀 SYSTEM CURRENT STATE
-
-• The Face / Open-WebUI Gateway (neptune_multi_agent_system.py): FULLY ACTIVE & GREEN. Rewritten as a native type-hinted pydantic framework conduit. The UI dashboard settings panel maps perfectly on the host dashboard screen, allowing seamless hot-toggles for Debug Mode, Host URLs, and Active Profiles.
-• The Mind Layer (/neptune/mind/): FULLY ACTIVE. The logistical core parsing filters (inspector.py), direct lookup shortcuts (inspector_utility.py), and the administrative sandbox tools (sysadmin_core.py, cache_purger.py) are fully written to disk and verified. The clear cache terminal intercept macro works flawlessly.
-• The Soul Layer (/neptune/soul/): FULLY ACTIVE. The epoch time-decay arousal tracking math loops (mood_engine.py) are active. The vocal execution engine (chatter/chatter_core.py) features a fully functional dual-node failover check that targets the primary RTX 4060 desktop rig first, with a distracted Konbini Shift fallback modifier built for the server's GTX 970 node.
-• The Body Layer (/neptune/body/): PARTIALLY BLOCKED. Prompt generation logic is clean (pipeline_compiler.py). The transactional dispatch client (comfy_dispatch.py) has been carefully aligned to use the strict production workflow JSON data rules (Checkpoint Node 1 targeting ponyRealism_v22MainVAE.safetensors, SDXL scaling formats, and String Concatenation blocks).
-
-🛑 THE IMMEDIATE BOTTLENECK
-
-When triggering a visual selfie command sequence pass ("Take a selfie"), the ComfyUI API validation suite instantly drops the generation request pass, throwing a rapid 0.01-second execution validation abort error.
-
-🎯 NEXT STEPS ON RESUME
-
-1. Verify if the execution crash stems from an out-of-bounds node parameter type conversion pass inside comfy_dispatch.py (e.g., numeric string node IDs vs strict integers inside the nested array links like ["19", 0]).
-2. Examine the target ComfyUI server terminal console stack logs directly during a prompt run to identify the specific Node ID and field name causing the validation flag.
-3. Debug why the VAEEncode logic node ("19") is failing validation when fed the latency pixel pointers from the LoadImage node template ("18").
+Where we stopped:
