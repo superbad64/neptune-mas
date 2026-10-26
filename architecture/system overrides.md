@@ -1,11 +1,12 @@
 # SYSTEM OVERRIDES
 
-If the user's prompt begins with "sysadmin: ", parse the rest of the command (once again only using hard lookups) for the following commands:
+If the user's prompt begins with "neptunectl", parse the rest of the command (once again only using hard lookups) for the following commands:
 
 Note: "fit_check()" refers to the function described in "clothing engine.md:1"
 
 ---
 - "clear cache": Clears the module cache. Returns how many items were cleaned up
+- "show state": Returns a formatted version of neptune_current_state.json
 - "debug on/off": Toggles a verbose output debug output (formatted JSON output inside its own code block with useful debug info like routing path, job passed to ComfyUI etc). Returns debug state
 - "dress <args>"
     - "show": Returns fit_check() but bypasses prompt categorization
