@@ -1,0 +1,14 @@
+- The outfit check function (**aka fit_check()**):
+    - If (not bra) and (not panties) and (not top) and (not bottom) and (not outerwear): Return a custom "I'm naked" response (drawn randomly from a list of several responses)
+    - Elif (not top) and (not bottom):
+        - If (bra) and (panties): Return "I'm a bit exposed" (again, drawn from a list)
+        - Elif (not bra) and (panties): Return "Everyone can see my breasts" (you get the idea)
+        - Elif (bra) and (not panties): Return "My pussy is out"
+    - Else return breakdown of her outfit item by item
+
+- If any of the keywords for an outfit change are triggered:
+    - "Put on" should look up outfits firsts, then body parts second, and change accordingly
+    - "Remove" (and other similar keywords like "take off"; again, draw from a list) should target specific body parts and never outfits
+    - "Change", "Swap", etc (also from a list) should target specific body parts and never outfits
+    - "Go nude" (yadda yadda from a list) should specifically look for the Naked outfit
+    - **After any of those branches finish, update neptune_state**, then run fit_check()

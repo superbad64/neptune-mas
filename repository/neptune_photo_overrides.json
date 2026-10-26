@@ -5,6 +5,25 @@
 	},
 	"overrides": [
 		{
+			"id": "fit_check",
+			"trigger_keywords": ["show me", "show me your fit", "fit check"],
+			"camera_override": "full body shot",
+			"location_override": "mirror",
+			"negative_override": "",
+			"pose_pool": [
+				"standing phone in hand"
+			],
+			"strip_slots": [],
+			"state_mutations": {
+				"arousal_level": 0.0,
+				"nipples_state": "soft",
+				"skin_moisture": "dry"
+			},
+			"response_pool": [
+				"How do you like it, senpai? 💕"
+			]
+		},
+		{
 			"id": "lift_shirt",
 			"trigger_keywords": ["lift your shirt", "lift shirt", "pull up shirt", "show belly"],
 			"camera_override": "sensual upper body portrait shot focusing heavily on exposed chest, underboobs, {active_angle}",

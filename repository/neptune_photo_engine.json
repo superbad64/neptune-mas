@@ -37,10 +37,12 @@
 		],
 		"special_poses": [
 			"kneeling posture, hands on thighs",
-			"kneeling posture, leaning forward forward"
+			"kneeling posture, hands behind back",
+			"kneeling posture, hands behind head",
+			"kneeling posture, rubbing pussy"
 		]
 	},
-	"baseline_expressions": {
+	"facial_expressions": {
 		"smiling": {
 			"prompt": "happy smile, cheerful expression, eyes bright",
 			"response_pool": [
@@ -54,16 +56,15 @@
 				"What's that look for, senpai? Did my pose completely throw off your focus routing? 😉💕",
 				"Oh, keeping things interesting, are we? Let's see if your lens can handle this look."
 			]
-		}
-	},
-	"facial_expressions": {
+		},
 		"ahegao": {
 			"triggers": ["ahegao", "mind break"],
 			"prompt": "eyes rolling back, mouth wide open, tongue far out, heavy blushing",
 			"mutually_exclusive_with": ["duckface", "winking", "tongue_out", "neutral", "smiling"],
 			"response_pool": [
-				"You really love pushing my matrix to the complete limit, don't you, senpai...? 💕",
-				"Brain tracking loop completely short-circuited... are you satisfied with this view now? 💕"
+				"You really love pushing me to my limits, don't you, senpai...? 💕",
+				"Brain tracking loop completely short-circuited... are you satisfied with this view now? 💕",
+				"H-hope you enjoy the view... s-senpai 💕"
 			]
 		},
 		"duckface": {
@@ -72,7 +73,8 @@
 			"mutually_exclusive_with": ["ahegao", "tongue_out", "neutral"],
 			"response_pool": [
 				"Sending a little kiss sequence straight through the lens matrix! Did you catch it? 😘",
-				"Just a classic selfie pose for you, senpai! Make sure it renders perfectly."
+				"Just a classic selfie pose for you, senpai! Make sure it renders perfectly UwU",
+				"Chuuu~ 💕"
 			]
 		},
 		"winking": {
@@ -80,8 +82,7 @@
 			"prompt": "one eye closed, playful wink",
 			"mutually_exclusive_with": ["ahegao"],
 			"response_pool": [
-				"Caught you staring, senpai! 😉 Just checking to see if your pipeline compilation is running smooth.",
-				"A playful wink for the records. Keep this file locked down safely!"
+				"Caught you staring, senpai! 😉 Just checking to see if your pipeline compilation is running smooth."
 			]
 		},
 		"tongue_out": {
@@ -89,8 +90,7 @@
 			"prompt": "tongue sticking out to one side",
 			"mutually_exclusive_with": ["ahegao", "duckface"],
 			"response_pool": [
-				"Blep! That's what you get for making me hold this specific posture for so long! 😜",
-				"Just a little bit of attitude for your layout tracking. Don't take me too seriously!"
+				"Blep! That's what you get for making me hold this specific posture for so long! 😜"
 			]
 		}
 	},
