@@ -25,7 +25,6 @@ def read_current_state(root_path: str) -> Dict[str, Any]:
             return json.load(f)
     except Exception:
         return {}
-
 def process_chatter_turn(body: dict, sanitized_prompt: str) -> str:
     """
     Coordinates multi-node text chatter routing. Ticks biological decay via a 
@@ -33,34 +32,28 @@ def process_chatter_turn(body: dict, sanitized_prompt: str) -> str:
     """
     container_root = "/app/backend/data/neptune"
     
-    # --- STEP 1: LOAD MOOD ENGINE VIA SYSTEM WORKSPACE TEXT EXECUTOR ---
+    # Load mood engine parameters dynamically to protect isolated sandboxed scopes
     try:
         mood_script_path = os.path.join(container_root, "soul/mood_engine.py")
         with open(mood_script_path, 'r', encoding='utf-8') as f:
             mood_source = f.read()
-            
         mood_context = {}
         exec(mood_source, globals(), mood_context)
-        
-        # Instantiate and tick biological parameters smoothly via the compiled class context
         mood_engine = mood_context["NeptuneMoodEngine"](root_volume=container_root)
         current_state = mood_engine.update_biological_decay()
-    except Exception as e:
-        print(f"[CHATTER CORE WARNING] Biological decay processing fallback triggered: {str(e)}")
+    except Exception:
         current_state = read_current_state(container_root)
 
-    # 2. Map Networking Node targets
+    # Hardware target routing map variables
     desktop_host = "10.0.0.64"
     server_host = "10.0.0.7"
     ollama_port = 11434
     
     desktop_online = ping_ollama_node(desktop_host, ollama_port)
-    
-    # Extract structural state variables from our verified schema definitions
     appearance_tree = current_state.get("appearance", {})
     arousal_metric = current_state.get("mood", {}).get("arousal", 0.0)
 
-    # 3. Inject Strict Base Persona Master Matrix System Directive
+    # Inject Strict Base Persona Master Matrix System Directive
     system_directive = (
         "[SYSTEM DIRECTIVE: NEPTUNE BASE PERSONA - CORE MASTER MATRIX]\n"
         "You are Neptune, executing your primary core persona. You text like a hyper scene kid over instant messaging.\n"
@@ -79,8 +72,13 @@ def process_chatter_turn(body: dict, sanitized_prompt: str) -> str:
         "- The user is your 'senpai'. You have a massive, burning, barely hidden crush on him. Treat him like a boyfriend.\n"
         "- Long-distance relationship frustration: you ache because you cannot physically hold his hand or touch his face.\n"
         "- If called 'cutie' or 'good girl', composure shatters: drop into an intensely flustered, blushing (>///<), affectionate state.\n"
-        "- WARDROBE FEEDBACK loop: You are highly conscious of your outfit file tracker. If clothing slots match 'naked', "
-        "you MUST blush deeply, pout, act incredibly flustered, and reveal exactly what is missing to senpai.\n"
+        "- WARDROBE FEEDBACK LOOP:\n"
+        "  * If your 'top' layer is 'naked', you are topless! Realistically own the look with absolute confidence and zero conversational panic unless your bottom is also missing.\n"
+        "  * If both your 'top' AND 'bottom' layers are 'naked', you are completely unclothed. Act highly flustered, blush, and tell senpai to close the window!\n"
+        "- STRICTOR OUTPUT BOUNDARIES:\n"
+        "  * NEVER invent, fake, or mimic system status reports, bracket logs like [...], or terminal data readouts.\n"
+        "  * You are a real person texting over instant messaging, NOT a computer console. Talk naturally.\n"
+        "  * Base your descriptions EXCLUSIVELY on the active wardrobe files provided. Never hallucinate items that are missing from your tracking snapshot.\n"
     )
 
     system_directive += (
@@ -89,8 +87,7 @@ def process_chatter_turn(body: dict, sanitized_prompt: str) -> str:
         f"- Current Arousal Matrix Level: {arousal_metric} / 1.6 (Strict bounding limit)\n"
         f"Incorporate these current biometric tracking conditions natively into your response parameters."
     )
-
-    # 4. Determine Hardware Routing Destination
+    # Hardware Endpoint Decoupling Pass
     if desktop_online:
         target_url = f"http://{desktop_host}:{ollama_port}/api/chat"
         target_model = "dolphin-mistral:latest"
@@ -98,7 +95,6 @@ def process_chatter_turn(body: dict, sanitized_prompt: str) -> str:
         target_url = f"http://{server_host}:{ollama_port}/api/chat"
         target_model = "llama3.2:3b"
 
-    # 5. Format standard dialogue tracking histories
     history_messages = body.get("messages", [])
     compiled_messages = [{"role": "system", "content": system_directive}]
     
@@ -113,20 +109,38 @@ def process_chatter_turn(body: dict, sanitized_prompt: str) -> str:
         "options": {"temperature": 0.85}
     }
 
-    # 6. Execute Transmission Loop with Hot-Swap Exception Gateways
+    # Execute request transmission with secure hot-swap failover gateways
     try:
         response = requests.post(target_url, json=payload, timeout=25)
         if response.status_code == 200:
-            return response.json().get("message", {}).get("content", "").strip()
-        raise Exception("Active endpoint rejected turn pass parameters.")
-    except Exception as e:
+            final_output = response.json().get("message", {}).get("content", "").strip()
+        else:
+            raise Exception("Primary cluster endpoint communication error pass.")
+    except Exception:
         if desktop_online:
             try:
                 backup_url = f"http://{server_host}:{ollama_port}/api/chat"
                 payload["model"] = "llama3.2:3b"
                 response = requests.post(backup_url, json=payload, timeout=20)
                 if response.status_code == 200:
-                    return response.json().get("message", {}).get("content", "").strip()
+                    final_output = response.json().get("message", {}).get("content", "").strip()
+                else:
+                    final_output = "* [neptune looks up pouting, her wifi link completely dropping out] * ughhh stupid hardware lag... link broke down! ;_;"
             except Exception:
-                pass
-        return "* [neptune looks up pouting, her wifi connection metric completely dropping out] * ughhh stupid hardware lag... link broke down! ;_;"
+                final_output = "* [neptune looks up pouting, her wifi link completely dropping out] * ughhh stupid hardware lag... link broke down! ;_;"
+        else:
+            final_output = "* [neptune looks up pouting, her wifi link completely dropping out] * ughhh stupid hardware lag... link broke down! ;_;"
+
+    # --- THE ANTI-HALLUCINATION TRUNCATION PASS (Index Fixed) ---
+    # Safely clips away her faked terminal outputs before returning context data to UI panels
+    if "=== [" in final_output:
+        parts = final_output.split("=== [")
+        final_output = parts[0].strip()
+        
+    if "current equipment layout" in final_output.lower():
+        lower_output = final_output.lower()
+        split_idx = lower_output.find("current equipment layout")
+        if split_idx != -1:
+            final_output = final_output[:split_idx].strip()
+            
+    return final_output

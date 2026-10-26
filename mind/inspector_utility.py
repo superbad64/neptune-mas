@@ -1,17 +1,25 @@
 import os
 import json
 import random
+import sys
 from typing import Dict, Any, List
 
 class NeptuneFitCheck:
     def __init__(self, root_volume: str = "/app/backend/data/neptune"):
-        # Confirmed absolute path synchronization mapping
         self.root_volume = root_volume
         self.state_path = f"{self.root_volume}/repository/neptune_current_state.json"
         self.wardrobe_path = f"{self.root_volume}/repository/neptune_wardrobe_manifest.json"
 
     def execute_fit_check(self) -> str:
-        """Calculates clothing exposure states using actual nested appearance fields."""
+        """
+        Calculates clothing exposure states using actual nested appearance fields.
+        Guaranteed to return a valid string under all logical branches.
+        """
+        try:
+            debug_active = sys.sandbox_run("core/diagnostics_logger.py", "check_debug_external")
+        except Exception:
+            debug_active = True
+
         if not os.path.exists(self.state_path):
             return "System Log: Current state tracking file is missing from disk arrays."
             
@@ -25,15 +33,10 @@ class NeptuneFitCheck:
         bottom = appearance.get("bottom", "naked").strip().lower()
         outerwear = appearance.get("outerwear", "naked").strip().lower()
 
-        # --- Rule 1: The 'I'm Naked' Condition Pass ---
+        # --- Hardwired Conditional State Returns ---
         if bra == "naked" and panties == "naked" and top == "naked" and bottom == "naked" and outerwear == "naked":
-            naked_responses = [
-                "* [Neptune covers herself completely, her cheeks turning bright red] * \"H-hey! I'm completely naked right now! Close the console window!\"",
-                "\"E-exposure matrix is maximum! I don't have a single piece of clothing on right now...\""
-            ]
-            return random.choice(naked_responses)
+            return "* [Neptune covers herself completely, blushing deeply] * \"H-hey! I'm completely naked right now! Close the console window!\""
 
-        # --- Rule 2: Topless & Bottomless Exposure Passes ---
         if top == "naked" and bottom == "naked":
             if bra != "naked" and panties != "naked":
                 return "\"I'm a bit exposed like this... just standing around in my underwear.\""
@@ -42,11 +45,9 @@ class NeptuneFitCheck:
             elif bra != "naked" and panties == "naked":
                 return "\"My pussy is out! Oh my gosh, this is a critical system vulnerability!\""
 
-        # --- Rule 3: Topless with a Bottom Condition ---
         if bottom != "naked" and top == "naked" and outerwear == "naked":
-            return "\"Going topless but wearing a bottom layer is... certainly a statement. My chest feels cold!\""
-
-        # --- Rule 4: Structural Format Return Loop ---
+            return "* [Neptune crosses her arms over her bare chest, pouting slightly] * \"Going topless but wearing a bottom layer is... certainly a statement. My chest feels cold!\""
+        # --- Fallback Relational Loop (If no explicit exposure condition is triggered) ---
         output_lines = ["Current Equipment Layout:"]
         try:
             with open(self.wardrobe_path, 'r', encoding='utf-8') as f:
@@ -55,7 +56,7 @@ class NeptuneFitCheck:
             wardrobe = {}
 
         for slot, item_key in appearance.items():
-            if item_key == "naked" or slot in ["accessories", "piercings"]:
+            if item_key == "naked" or slot in ["accessories", "piercings", "hairstyle"]:
                 continue
                 
             flavor_text = None
@@ -65,14 +66,22 @@ class NeptuneFitCheck:
                     break
             
             if flavor_text:
-                output_lines.append(f'"{slot}": "{flavor_text}"')
+                clean_flavor = str(flavor_text).strip('"\'')
+                output_lines.append(f'"{slot}": "{clean_flavor}"')
+            else:
+                # Direct string fallback representation if manifest text is missing
+                output_lines.append(f'"{slot}": "{item_key}"')
                 
         if len(output_lines) == 1:
-            return "Wearing basic components without localized flavor descriptors."
+            return "Wearing basic components without localized flavor descriptors. (All major layers naked/cleared)"
+            
         return "\n".join(output_lines)
 
     def modify_clothing_state(self, action: str, body_part: str, target_item: str = "") -> str:
-        """Mutates tracking markers and commits parameters to neptune_current_state.json."""
+        """Mutates wardrobe tracking properties and commits the schema state to disk."""
+        if not os.path.exists(self.state_path):
+            return "System Log: Cannot mutate state. Tracking file is missing."
+
         with open(self.state_path, 'r', encoding='utf-8') as f:
             state = json.load(f)
             
@@ -105,10 +114,6 @@ class NeptuneFitCheck:
             if body_part in state["appearance"] and body_part != "outfit":
                 state["appearance"][body_part] = "naked"
 
-        elif action in ["change", "swap"]:
-            if body_part in state["appearance"] and body_part != "outfit":
-                state["appearance"][body_part] = target_item
-
         elif action == "go_nude":
             for slot in state["appearance"]:
                 if slot not in ["hairstyle", "accessories", "piercings"]:
@@ -118,14 +123,3 @@ class NeptuneFitCheck:
             json.dump(state, f, indent=2)
 
         return self.execute_fit_check()
-
-# =========================================================================
-# GLOBAL INTEGRITY SANDBOX EXPORT HOOKS
-# =========================================================================
-def execute_fit_check_external(root_volume: str) -> str:
-    checker = NeptuneFitCheck(root_volume=root_volume)
-    return checker.execute_fit_check()
-
-def modify_clothing_state_external(root_volume: str, action: str, body_part: str, target_item: str = "") -> str:
-    checker = NeptuneFitCheck(root_volume=root_volume)
-    return checker.modify_clothing_state(action, body_part, target_item)
