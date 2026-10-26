@@ -3,7 +3,7 @@
 - Check if they are all inter-compatible; each step, remove the one with the most conflicts until the checks clear
 - If no expression is specified, default to "smiling"
 
-- If prompt matches any of the overrides, execute that override, **do not update neptune_state**
+- If prompt matches any of the overrides, execute that override, **do not update neptune_current_state.json**
 - Else:
     - Look for keywords indicating this is a reshoot (provide a list but generally speaking something along the lines of "Can you take the same <term used to describe a picture> but with <list of modifications> ?")
     - If it is not a reshoot:
@@ -16,3 +16,6 @@
     - Else if it *is* a reshoot:
         - Keep the same location, pose and expression **unless either of those is explicitly modified**. Re-run the facial expression engine if needed
         - Upload the latest picture sent in chat by Neptune to comfyUI then trigger the image edit workflow
+
+# HOW TO IMAGE GENERATION
+Build the positive prompt by starting with the character attributes, the facial expressions, the outfit, the location, then the pose.

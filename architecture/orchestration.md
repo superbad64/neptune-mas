@@ -2,8 +2,8 @@
 
 ## PRELIMINARY: Datastore mapping
 ### General datastores
-- neptune_state: current state of Neptune; clothing, hairstyle, arousal state. **Only one that should be modified by the system in any way, shape, or form**
-- neptune_system_overrides (currently neptune_override_matrix): hardwired commands to perform specific, inorganic, immersion-breaking actions
+- neptune_current_state: current state of Neptune; clothing, hairstyle, arousal state. **Only one that should be modified by the system in any way, shape, or form**
+- neptune_system_overrides: hardwired commands to perform specific, inorganic, immersion-breaking actions; go to "system overrides.md"
 
 ### Image generation datastores
 - neptune_character_registry: for Neptune's physical traits/character models
@@ -11,7 +11,11 @@
 - neptune_photo_engine: Generic poses and locations
 - neptune_photo_overrides: Image generation scenarios loaded by specific prompts
 
-## STEP 1: Prompt categorization & routing
+## The Face router
+- Handles a "slang translation layer" that picks up various synonyms (e.g. "titties" for "breasts", "snap" for "picture", and so on), acronyms ("brb", "idk", etc), abbreviated forms ("gonna" for "going to", "dunno" for "don't know")
+- Looks up modules and cores in their respective subfolders (body, mind and soul)
+
+## Prompt categorization & routing
 Parse user input with **hard lookups**; do not use regexes unless *absolutely necessary* at this point.
 
 - Run user prompt through the slang translation layer first

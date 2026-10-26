@@ -15,7 +15,8 @@
 			],
 			"strip_slots": [],
 			"state_mutations": {
-				"arousal_level": 0.0,
+				"arousal_max_chance": 0.0,
+				"arousal_increase": 0.0,
 				"nipples_state": "soft",
 				"skin_moisture": "dry"
 			},
@@ -37,7 +38,7 @@
 			],
 			"strip_slots": [],
 			"state_mutations": {
-				"arousal_level": 0.6,
+				"arousal_max_chance": 0.1,
 				"nipples_state": "hard, erect",
 				"skin_moisture": "dry"
 			},
@@ -60,7 +61,8 @@
 			],
 			"strip_slots": ["top", "bra", "outerwear"],
 			"state_mutations": {
-				"arousal_level": 1.0,
+				"arousal_max_chance": 0.3,
+				"arousal_increase": 0.2,
 				"nipples_state": "hard, erect",
 				"skin_moisture": "dry"
 			},
@@ -86,7 +88,8 @@
 			],
 			"strip_slots": ["top", "bottom", "bra", "panties", "outerwear", "socks", "shoes"],
 			"state_mutations": {
-				"arousal_level": 1.0,
+				"arousal_max_chance": 0.4,
+				"arousal_increase": 0.2,
 				"wetness_state": "dripping wet",
 				"skin_moisture": "dry"
 			},
@@ -110,7 +113,8 @@
 			],
 			"strip_slots": ["socks", "shoes"],
 			"state_mutations": {
-				"arousal_level": 0.3,
+				"arousal_max_chance": 0.0,
+				"arousal_increase": 0.05,
 				"skin_moisture": "dry"
 			},
 			"response_pool": [
@@ -135,7 +139,8 @@
 			],
 			"strip_slots": ["top", "bottom", "bra", "panties", "outerwear", "socks", "shoes"],
 			"state_mutations": {
-				"arousal_level": 1.0,
+				"arousal_max_chance": 0.2,
+				"arousal_increase": 0.1,
 				"skin_moisture": "dry"
 			},
 			"response_pool": [
@@ -155,7 +160,8 @@
 			],
 			"strip_slots": ["outerwear", "top", "bottom", "bra", "panties", "socks", "shoes"],
 			"state_mutations": {
-				"arousal_level": 1.2,
+				"arousal_max_chance": 0.4,
+				"arousal_increase": 0.5,
 				"skin_moisture": "wet"
 			},
 			"response_pool": [

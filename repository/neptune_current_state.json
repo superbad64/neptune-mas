@@ -1,0 +1,19 @@
+{
+    "appearance": {
+        "hat": "naked",
+        "hairstyle": "loose_hair",
+        "outerwear": "naked",
+        "top": "naked",
+        "bra": "naked",
+        "bottom": "naked",
+        "panties": "naked",
+        "socks": "naked",
+        "shoes": "naked",
+        "accessories": [],
+        "piercings": []
+    },
+    "mood": {
+        "arousal": 0.0,
+        "status_effects": []
+    }
+}

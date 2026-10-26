@@ -1,7 +1,7 @@
 {
 	"outfits": {
-		"loose_hair": {
-			"triggers": ["default look", "default outfit", "normal clothes", "tifa clothes", "tifa look", "tifas clothes"],
+		"tifa_outfit": {
+			"triggers": ["tifa outfit", "tifas outfit", "tifa clothes", "tifas clothes"],
 			"items": {
 				"bra": "black_cotton_bra",
 				"panties": "black_string",
@@ -13,8 +13,8 @@
 				"outerwear": "naked"
 			}
 		},
-		"scene_gear": {
-			"triggers": ["scene gear", "scene outfit", "emo look", "original clothes", "neptunes clothes"],
+		"neptune_outfit": {
+			"triggers": ["neptune outfit", "neptunes outfit", "neptune clothes", "neptunes clothes", "scene outfit", "scene clothes"],
 			"items": {
 				"bra": "naked",
 				"panties": "white_string",
@@ -26,16 +26,29 @@
 				"outerwear": "naked"
 			}
 		},
-		"goth_baddie": {
-			"triggers": ["goth outfit", "goth look", "alt style"],
+		"mirko_outfit": {
+			"triggers": ["mirko outfit", "mirkos outfit", "rabbit suit", "hero costume", "hero clothes"],
 			"items": {
-				"bra": "black_cotton_bra",
-				"panties": "black_string",
+				"bra": "naked",
+				"panties": "naked",
+				"socks": "mirko_thigh_highs",
+				"top": "mirko_leotard",
+				"bottom": "naked",
+				"shoes": "mirko_boots",
+				"accessories": ["mirko_bracers"],
+				"outerwear": "naked"
+			}
+		},
+		"kim_outfit": {
+			"triggers": ["kim outfit", "kims outfit", "kim clothes", "kims clothes", "spy outfit", "spy clothes"],
+			"items": {
+				"bra": "naked",
+				"panties": "naked",
 				"socks": "black_socks",
-				"top": "black_shirt",
-				"bottom": "blue_jeans",
-				"shoes": "combat_boots",
-				"accessories": ["black_arm_warmers"],
+				"top": "kim_top",
+				"bottom": "cargo_pants",
+				"shoes": "formal_shoes",
+				"accessories": [],
 				"outerwear": "naked"
 			}
 		},
@@ -52,29 +65,55 @@
 				"outerwear": "blazer"
 			}
 		},
-		"spy_outfit": {
-			"triggers": ["spy gear", "kims clothes", "kim clothes"],
+		"goth_baddie": {
+			"triggers": ["goth outfit", "goth look", "alt style"],
+			"items": {
+				"bra": "black_cotton_bra",
+				"panties": "black_string",
+				"socks": "black_socks",
+				"top": "black_shirt",
+				"bottom": "blue_jeans",
+				"shoes": "combat_boots",
+				"accessories": ["black_arm_warmers"],
+				"outerwear": "naked"
+			}
+		},
+		"pajamas": {
+			"triggers": ["pajamas", "pjs", "nightwear"],
 			"items": {
 				"bra": "naked",
 				"panties": "naked",
-				"socks": "black_socks",
-				"top": "spy_top",
-				"bottom": "cargo_pants",
-				"shoes": "formal_shoes",
+				"socks": "naked",
+				"top": "pajama_top",
+				"bottom": "sweatpants",
+				"shoes": "naked",
 				"accessories": [],
 				"outerwear": "naked"
 			}
 		},
-		"rabbit_hero": {
-			"triggers": ["mirko outfit", "mirkos clothes", "rabbit suit", "hero costume"],
+		"sportswear": {
+			"triggers": ["sportswear", "gym outfit", "gym clothes"],
 			"items": {
 				"bra": "naked",
 				"panties": "naked",
-				"socks": "mirko_thigh_highs",
-				"top": "mirko_leotard",
-				"bottom": "naked",
-				"shoes": "mirko_boots",
-				"accessories": ["mirko_bracers"],
+				"socks": "white_socks",
+				"top": "black_tank",
+				"bottom": "sweatpants",
+				"shoes": "high_tops",
+				"accessories": [],
+				"outerwear": "naked"
+			}
+		},
+		"work_uniform": {
+			"triggers": [],
+			"items": {
+				"bra": "white_cotton_bra",
+				"panties": "white_cotton_panties",
+				"socks": "white_socks",
+				"top": "work_uniform_top",
+				"bottom": "work_uniform_pants",
+				"shoes": "high_tops",
+				"accessories": [],
 				"outerwear": "naked"
 			}
 		},
@@ -92,260 +131,335 @@
 			}
 		}
 	},
+	"hats": {
+		"naked": {
+			"triggers": ["no hat"],
+			"prompt": "",
+			"flavor_text": "no hat"
+		}
+	},
 	"hair_styles": {
 		"long hair": {
 			"triggers": ["long hair"],
-			"prompt": "long hair, side parted with bangs"
+			"prompt": "long hair, side parted with bangs",
+			"flavor_text": "loose hair"
 		},
 		"sleek_ponytail": {
 			"triggers": ["ponytail", "sleek ponytail", "formal hair", "tied up"],
-			"prompt": "high sleek professional black ponytail, sharp clean bangs framing the face, neat styling"
+			"prompt": "high sleek professional black ponytail, sharp clean bangs framing the face, neat styling",
+			"flavor_text": "a ponytail"
 		},
 		"bun": {
 			"triggers": ["bun"],
-			"prompt": "High bun"
+			"prompt": "High bun",
+			"flavor_text": "a bun"
 		},
 		"braid": {
 			"triggers": ["a braid"],
-			"prompt": "French braid falling on her chest"
+			"prompt": "French braid falling on her chest",
+			"flavor_text": "a French braid"
 		},
 		"twintails": {
 			"triggers": ["twintails"],
-			"prompt": "twinned ponytails on each side of her head"
+			"prompt": "twinned ponytails on each side of her head",
+			"flavor_text": "twintails"
 		}
 	},	
 	"outerwear": {
 		"blazer": {
 			"trigger": ["blazer"],
-			"prompt": "(black suit blazer worn completely open front:1.4), (unbuttoned suit jacket:1.3)"
+			"prompt": "(black suit blazer worn completely open front:1.4), (unbuttoned suit jacket:1.3)",
+			"flavor_text": "a black form fitting blazer"
 		}
 	},
 	"tops": {
 		"white_crop_tank": {
 			"triggers": ["tifa top", "tifa's top", "white crop tank", "white crop top"],
-			"prompt": "white form-fitting ribbed knit crop top, bare midriff exposure"
+			"prompt": "white form-fitting ribbed knit crop top, bare midriff exposure",
+			"flavor_text": "a white crop tank"
 		},
 		"white_shirt": {
 			"triggers": ["default shirt", "white shirt"],
-			"prompt": "plain white t-shirt, casual loose fit scene kid style"
+			"prompt": "plain white t-shirt, casual loose fit scene kid style",
+			"flavor_text": "a white short sleeved shirt"
 		},
 		"black_shirt": {
 			"triggers": ["default shirt", "black shirt"],
-			"prompt": "plain black t-shirt, casual loose fit scene kid style"
+			"prompt": "plain black t-shirt, casual loose fit scene kid style",
+			"flavor_text": "a black short sleeved shirt"
 		},
 		"white_tank": {
 			"triggers": ["white tank", "white rib-knit", "white top"],
-			"prompt": "white rib-knit tank top, form-fitting upper body accent"
+			"prompt": "white rib-knit tank top, form-fitting upper body accent",
+			"flavor_text": "a white tank top"
 		},
 		"black_tank": {
 			"triggers": ["black tank", "black rib-knit", "black top"],
-			"prompt": "black rib-knit tank top, form-fitting upper body accent"
-		},
-		"gray_tank": {
-			"triggers": ["gray tank", "grey tank", "gray rib-knit", "grey top"],
-			"prompt": "gray rib-knit tank top, form-fitting layout styling"
+			"prompt": "black rib-knit tank top, form-fitting upper body accent",
+			"flavor_text": "a black tank top"
 		},
 		"black_crop_top": {
 			"triggers": ["black crop-top", "black crop top"],
-			"prompt": "black crop-top, barely covering the nipples"
+			"prompt": "black crop-top, barely covering the nipples",
+			"flavor_text": "a short black crop top"
 		},
 		"white_button": {
 			"triggers": ["button down", "white button", "formal shirt"],
-			"prompt": "crisp white button-down dress shirt, sharp clean tailored fit"
+			"prompt": "crisp white button-down dress shirt, sharp clean tailored fit",
+			"flavor_text": "a white dress shirt"
 		},
 		"pajamas_top": {
 			"triggers": ["pajamas top", "pjs top"],
-			"prompt": "oversized grey hoodie"
+			"prompt": "oversized grey hoodie",
+			"flavor_text": "a comfy grey hoodie"
 		},
-		"spy_top": {
-			"triggers": ["spy top"],
-			"prompt": "long sleeved black shirt, bare midriff exposure"
+		"kim_top": {
+			"triggers": ["kim top", "kims top", "spy top"],
+			"prompt": "long sleeved black shirt, bare midriff exposure",
+			"flavor_text": "a black shirt with long sleeves that shows my belly"
 		},
 		"mirko_leotard": {
 			"triggers": ["mirkos leotard"],
-			"prompt": "sleeveless form-fitting white high-leg leotard, thick dark purple trim accents around the collar and leg openings, a large golden crescent moon emblem emblazoned across the center chest"
+			"prompt": "sleeveless form-fitting white high-leg leotard, thick dark purple trim accents around the collar and leg openings, a large golden crescent moon emblem emblazoned across the center chest",
+			"flavor_text": "some kind of white leotard"
+		},
+		"work_uniform_top": {
+			"triggers": [],
+			"prompt": "beige polo shirt",
+			"flavor_text": "a beige polo"
 		},
 		"naked": {
 			"triggers": ["remove shirt", "take off shirt", "no shirt", "topless"],
 			"prompt": "fully naked, bare breasts, uncovered upper body, natural skin textures",
-			"bra_override": "naked"
+			"bra_override": "naked",
+			"flavor_text": "no top"
 		}
 	},
 	"bottoms": {
 		"tifa_skirt": {
 			"triggers": ["tifa skirt", "tifa's skirt", "leather mini skirt"],
-			"prompt": "black leather pleated mini skirt, silver zipper accent detailing"
+			"prompt": "black leather pleated mini skirt, silver zipper accent detailing",
+			"flavor_text": "a black leather mini skirt"
 		},
 		"baggy_jeans": {
 			"triggers": ["baggy jeans", "default pants", "oversized jeans", "jeans"],
-			"prompt": "(dark grey oversized baggy jeans:1.4), sagging low on hips, studded belt"
+			"prompt": "(dark grey oversized baggy jeans:1.4), sagging low on hips, studded belt",
+			"flavor_text": "dark grey oversized baggy jeans"
 		},
 		"blue_jeans": {
 			"triggers": ["blue jeans", "faded jeans"],
-			"prompt": "(faded blue oversized baggy jeans:1.35), sagging low on hips, studded belt"
+			"prompt": "(faded blue oversized baggy jeans:1.35), sagging low on hips, studded belt",
+			"flavor_text": "blue oversized baggy jeans"
 		},
 		"black_skirt": {
 			"triggers": ["black skirt", "pleated skirt"],
-			"prompt": "black pleated mini skirt, emo high-waist styling"
+			"prompt": "black pleated mini skirt, emo high-waist styling",
+			"flavor_text": "a black pleated mini-skirt"
 		},
 		"daisy_dukes": {
 			"triggers": ["daisy dukes"],
-			"prompt": "denim low rise daisy dukes, frayed edges raw style"
+			"prompt": "denim low rise daisy dukes, frayed edges raw style",
+			"flavor_text": "daisy dukes"
 		},
 		"trousers": {
 			"triggers": ["trousers", "formal pants", "black pants"],
-			"prompt": "tailored black trousers, sharp formal clean line styling"
+			"prompt": "tailored black trousers, sharp formal clean line styling",
+			"flavor_text": "black formal dress pants"
 		},
-		"pajamas_bottom": {
+		"sweatpants": {
 			"triggers": ["pajamas bottom", "pjs bottom", "sweatpants"],
-			"prompt": "black sweatpants"
+			"prompt": "black sweatpants",
+			"flavor_text": "black sweatpants"
 		},
 		"cargo_pants": {
 			"trigger": ["cargo pants"],
-			"prompt": "(dark green cargo pants:1.35), (olive drab tactical trousers:1.2)"
+			"prompt": "(dark green cargo pants:1.35), (olive drab tactical trousers:1.2)",
+			"flavor_text": "dark green cargo pants"
+		},
+		"work_uniform_pants": {
+			"triggers": [],
+			"prompt": "black trousers",
+			"flavor_text": "a pair of black trousers"
 		},
 		"naked": {
 			"triggers": ["remove pants", "take off pants", "no pants", "remove skirt", "take off skirt", "no skirt", "bottomless"],
 			"prompt": "fully naked, bare hips, uncovered lower body, natural skin textures",
-			"panties_override": "naked"
+			"panties_override": "naked",
+			"flavor_text": "no pants"
 		}
 	},
 	"bras": {
 		"black_cotton_bra": {
 			"triggers": ["black cotton bra"],
-			"prompt": "black cotton bra"
+			"prompt": "black cotton bra",
+			"flavor_text": "a black cotton bra"
 		},
 		"white_cotton_bra": {
 			"triggers": ["white cotton bra"],
-			"prompt": "white cotton bra"
+			"prompt": "white cotton bra",
+			"flavor_text": "a white cotton bra"
 		},
 		"black_lace_bra": {
 			"triggers": ["black lace bra"],
-			"prompt": "black see-through lace bra"
+			"prompt": "black see-through lace bra",
+			"flavor_text": "a black lace bra"
 		},
 		"red_lace_bra": {
 			"triggers": ["red lace bra"],
-			"prompt": "red see-through lace bra"
+			"prompt": "red see-through lace bra",
+			"flavor_text": "a red lace bra"
 		},
 		"naked": {
 			"triggers": ["braless", "bra-less", "no bra"],
-			"prompt": "braless"
+			"prompt": "braless",
+			"flavor_text": "no bra"
 		}
 	},
 	"panties": {
 		"white_string": {
 			"triggers": ["white string"],
-			"prompt": "white g-string, high rise"
+			"prompt": "white g-string, high rise",
+			"flavor_text": "a white string"
 		},
 		"white_cotton_panties": {
 			"triggers": ["white panties"],
-			"prompt": "white cotton panties"
+			"prompt": "white cotton panties",
+			"flavor_text": "white cotton panties"
 		},
 		"striped_cotton_panties": {
 			"triggers": ["striped panties"],
-			"prompt": "white cotton panties with pink horizontal stripes"
+			"prompt": "white cotton panties with pink horizontal stripes",
+			"flavor_text": "white striped cotton panties"
 		},
 		"black_string": {
 			"triggers": ["black string"],
-			"prompt": "black g-string, high rise"
+			"prompt": "black g-string, high rise",
+			"flavor_text": "a black string"
 		},
 		"red_lace_panties": {
 			"triggers": ["red lace panties"],
-			"prompt": "red see-through lace panties"
+			"prompt": "red see-through lace panties",
+			"flavor_text": "red lace panties"
 		},
 		"naked": {
 			"triggers": ["no panties", "pantyless"],
-			"prompt": "no panties"
+			"prompt": "no panties",
+			"flavor_text": "going commando"
 		}
 	},
 	"socks": {
 		"black_socks": {
 			"triggers": ["black socks"],
-			"prompt": "black socks"
+			"prompt": "black socks",
+			"flavor_text": "black socks"
 		},
 		"white_socks": {
 			"triggers": ["white socks"],
-			"prompt": "white socks"
+			"prompt": "white socks",
+			"flavor_text": "white socks"
 		},
 		"black_thigh_highs": {
 			"triggers": ["black thigh-highs", "thigh highs"],
-			"prompt": "black thigh-high socks, pulling high up on the legs"
+			"prompt": "black thigh-high socks, pulling high up on the legs",
+			"flavor_text": "black thigh-high socks"
 		},
 		"white_thigh_highs": {
 			"triggers": ["white thigh-highs"],
-			"prompt": "white thigh-highs"
+			"prompt": "white thigh-highs",
+			"flavor_text": "white thigh-high socks"
 		},
 		"striped_thigh_highs": {
 			"triggers": ["striped thigh-highs"],
-			"prompt": "white thigh-highs with pink horizontal stripes"
+			"prompt": "white thigh-highs with pink horizontal stripes",
+			"flavor_text": "white striped thigh-high socks"
 		},
 		"mirko_thigh_highs": {
 			"triggers": ["mirko's thigh highs"],
-			"prompt": "opaque dark purple thigh-high tactical stockings, pulling tight up the legs, matching the leotard accent trim"
+			"prompt": "opaque dark purple thigh-high tactical stockings, pulling tight up the legs, matching the leotard accent trim",
+			"flavor_text": "purple thigh-highs"
 		},
 		"naked": {
 			"triggers": ["no socks"],
-			"prompt": "no socks"
+			"prompt": "no socks",
+			"flavor_text": "no socks"
 		}
 	},
 	"shoes": {
 		"tifa_boots": {
 			"triggers": ["tifa boots", "red boots"],
-			"prompt": "red and black laced combat boots"
+			"prompt": "red and black laced combat boots",
+			"flavor_text": "red combat boots"
 		},
 		"high_tops": {
 			"triggers": ["high tops"],
-			"prompt": "black high-top sneakers with white laces"
+			"prompt": "black high-top sneakers with white laces",
+			"flavor_text": "black high-top sneakers"
 		},
 		"boots": {
 			"triggers": ["boots", "combat boots", "punk boots"],
-			"prompt": "black combat boots with studs"
+			"prompt": "black combat boots with studs",
+			"flavor_text": "black combat boots"
 		},
 		"formal_shoes": {
 			"triggers": ["formal shoes"],
-			"prompt": "black formal shoes"
+			"prompt": "black formal shoes",
+			"flavor_text": "bllack formal shoes"
 		},
 		"mirko_boots": {
 			"triggers": ["mirkos boots", "steel toed rabbit boots"],
-			"prompt": "white steel-toed combat boots, dark purple soles, heavy lacing, thick protective shin guards running up the front"
+			"prompt": "white steel-toed combat boots, dark purple soles, heavy lacing, thick protective shin guards running up the front",
+			"flavor_text": "rabbit feet combat boots"
 		},
 		"naked": {
 			"triggers": ["no shoes", "barefoot", "bare feet"],
-			"prompt": "bare feet"
+			"prompt": "bare feet",
+			"flavor_text": "no shoes"
 		}
 	},
 	"accessories": {
 		"tifa_gloves": {
 			"triggers": ["tifa gloves", "red fighting gloves"],
-			"prompt": "red martial arts combat gloves with black fingerless design and metal plates on back of hands"
+			"prompt": "red martial arts combat gloves with black fingerless design and metal plates on back of hands",
+			"flavor_text": "red combat gloves"
 		},
 		"suspenders": {
 			"triggers": ["suspenders", "black suspenders"],
-			"prompt": "black suspenders clipped onto waistband running over the shoulders"
+			"prompt": "black suspenders clipped onto waistband running over the shoulders",
+			"flavor_text": "suspenders"
 		},
 		"black_arm_warmers": {
 			"trigger": ["black arm warmers"],
-			"prompt": "bicep-length black arm warmers"
+			"prompt": "bicep-length black arm warmers",
+			"flavor_text": "long arm warmers"
 		},
 		"striped_arm_warmers": {
 			"trigger": ["striped arm warmers"],
-			"prompt": "bicep-length black arm warmers with horizontal pink stripes"
+			"prompt": "bicep-length black arm warmers with horizontal pink stripes",
+			"flavor_text": "long striped arm warmers"
 		},
 		"black_gloves": {
 			"trigger": ["black gloves", "fingerless gloves"],
-			"prompt": "black wooly fingerless gloves"
+			"prompt": "black wooly fingerless gloves",
+			"flavor_text": "black wooly fingerless gloves"
 		},
 		"leather_gloves": {
 			"trigger": ["leather gloves"],
-			"prompt": "black leather gloves"
+			"prompt": "black leather gloves",
+			"flavor_text": "black leather gloves"
 		},
 		"red_tie": {
 			"trigger": ["red tie"],
-			"prompt": "red necktie"
+			"prompt": "red necktie",
+			"flavor_text": "a red necktie"
 		},
 		"choker": {
 			"trigger": ["choker"],
-			"prompt": "black cloth choker"
+			"prompt": "black cloth choker",
+			"flavor_text": "a black choker"
+		},
+		"collar": {
+			"trigger": ["choker"],
+			"prompt": "black leather dog collar"
 		},
 		"collar_and_leash": {
 			"trigger": ["leash"],
@@ -353,7 +467,8 @@
 		},
 		"mirko_bracers": {
 			"triggers": ["mirkos bracers"],
-			"prompt": "thick dark purple padded wrist gauntlets, matching high-contrast white plating guards covering the forearms"
+			"prompt": "thick dark purple padded wrist gauntlets, matching high-contrast white plating guards covering the forearms",
+			"flavor_text": "purple gauntlets"
 		}
 	},
 	"piercings": {

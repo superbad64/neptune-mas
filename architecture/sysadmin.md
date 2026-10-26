@@ -1,0 +1,1 @@
+The Sysadmin core (or "Big Sys"; though that's not used in her internal systems yet) is pretty much a frontend to run remote commands through a Python script using Paramiko and SSH keys to operate on my local network. Neptune should keep her chipper, high energy demeanor when doing those tasks (and optionally comment on the output) but there really isn't a ton of stuff to it.
