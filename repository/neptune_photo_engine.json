@@ -44,14 +44,14 @@
 	},
 	"facial_expressions": {
 		"smiling": {
-			"prompt": "happy smile, cheerful expression, eyes bright",
+			"prompt": "((happy wide smile, open mouth smile, cheerful facial expression, eyes bright, looking at camera:1.35))",
 			"response_pool": [
 				"Are you capturing my good side, senpai? I made sure to smile just for your camera loop! 💕",
 				"Smiling on cue isn't hard when it's you taking the picture. Do I look cute?"
 			]
 		},
 		"teasing": {
-			"prompt": "smirk, teasing expression, mischievous eyes",
+			"prompt": "((smirk, teasing expression, mischievous eyes, playful facial expression, subtle smirk:1.35))",
 			"response_pool": [
 				"What's that look for, senpai? Did my pose completely throw off your focus routing? 😉💕",
 				"Oh, keeping things interesting, are we? Let's see if your lens can handle this look."
@@ -59,7 +59,7 @@
 		},
 		"ahegao": {
 			"triggers": ["ahegao", "mind break"],
-			"prompt": "eyes rolling back, mouth wide open, tongue far out, heavy blushing",
+			"prompt": "((intense ahegao expression, eyes rolled back completely, mouth wide open, tongue sticking far out, saliva string, heavy blushing, sensory overload expression:1.4))",
 			"mutually_exclusive_with": ["duckface", "winking", "tongue_out", "neutral", "smiling"],
 			"response_pool": [
 				"You really love pushing me to my limits, don't you, senpai...? 💕",
@@ -68,8 +68,8 @@
 			]
 		},
 		"duckface": {
-			"triggers": ["duckface", "duck face", "kiss face"],
-			"prompt": "prominent lips, ready to kiss",
+			"triggers": ["duckface", "duck face", "kiss face", "pouting"],
+			"prompt": "((exaggerated duckface pout, prominent puckered lips, blowing a kiss, playful selfie facial expression:1.35))",
 			"mutually_exclusive_with": ["ahegao", "tongue_out", "neutral"],
 			"response_pool": [
 				"Sending a little kiss sequence straight through the lens matrix! Did you catch it? 😘",
@@ -79,38 +79,39 @@
 		},
 		"winking": {
 			"triggers": ["winking", "wink"],
-			"prompt": "one eye closed, playful wink",
+			"prompt": "((playful one-eye wink, one eye tightly closed, asymmetrical facial expression, looking at camera:1.35))",
 			"mutually_exclusive_with": ["ahegao"],
 			"response_pool": [
-				"Caught you staring, senpai! 😉 Just checking to see if your pipeline compilation is running smooth."
+				"Hehe, like this, Senpai? Let me know if I look cute! 😉",
+				"Just a quick little wink for you, Boss! Did I catch your attention? 😜"
 			]
 		},
 		"tongue_out": {
 			"triggers": ["tongue out", "blep", "sticking tongue out"],
-			"prompt": "tongue sticking out to one side",
+			"prompt": "((playful tongue out, sticking tongue out to one side, mischievous expression, closed eyes blep:1.35))",
 			"mutually_exclusive_with": ["ahegao", "duckface"],
 			"response_pool": [
 				"Blep! That's what you get for making me hold this specific posture for so long! 😜"
 			]
 		}
 	},
-    "locations": {
-        "bed": {
-            "allowed_pose_pools": ["chair_sitting_poses", "bed_sitting_poses", "lying_poses", "special_poses"],
-            "allowed_angles": ["from above", "from the front", "from the left side", "from the right side", "eye-level shot"]
-        },
-        "mirror": {
-            "allowed_pose_pools": ["standing_poses"],
-            "allowed_angles": ["from the front", "from the back", "eye-level shot"],
-            "forced_prompt_modifier": "mirror reflection selfie shot"
-        },
-        "desk": {
-            "allowed_pose_pools": ["chair_sitting_poses"],
-            "allowed_angles": ["from the front", "from the left side", "from the right side", "eye-level shot"]
-        },
-        "floor": {
-            "allowed_pose_pools": ["bed_sitting_poses", "special_poses"],
-            "allowed_angles": ["from above", "from the front", "from below", "from the left side", "from the right side"]
-        }
-    }
+	"locations": {
+		"bed": {
+				"allowed_pose_pools": ["chair_sitting_poses", "bed_sitting_poses", "lying_poses", "special_poses"],
+				"allowed_angles": ["from above", "from the front", "from the left side", "from the right side", "eye-level shot"]
+		},
+		"mirror": {
+				"allowed_pose_pools": ["standing_poses"],
+				"allowed_angles": ["from the front", "from the back", "eye-level shot"],
+				"forced_prompt_modifier": "mirror reflection selfie shot"
+		},
+		"desk": {
+				"allowed_pose_pools": ["chair_sitting_poses"],
+				"allowed_angles": ["from the front", "from the left side", "from the right side", "eye-level shot"]
+		},
+		"floor": {
+				"allowed_pose_pools": ["bed_sitting_poses", "special_poses"],
+				"allowed_angles": ["from above", "from the front", "from below", "from the left side", "from the right side"]
+		}
+	}
 }

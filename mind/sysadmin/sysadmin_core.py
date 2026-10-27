@@ -1,235 +1,197 @@
 import os
 import sys
 import json
-import traceback
+import importlib
+
+def _append_console_debug(base_res: str, transaction_id: str, context_details: str = "") -> str:
+    """Handles dynamic panel logging via native importlib hooks, preventing sys errors."""
+    container_root = "/app/backend/data/neptune"
+    state_file = f"{container_root}/repository/neptune_current_state.json"
+    debug_active = True
+    if os.path.exists(state_file):
+        try:
+            with open(state_file, 'r', encoding='utf-8') as f:
+                debug_active = json.load(f).get("debug_verbosity", True)
+        except Exception: pass
+    if not debug_active: return base_res
+    meta = {
+        "ADMIN_EXECUTION_CONTEXT": transaction_id.upper(),
+        "TELEMETRY_LOG_TIME": "SYSTEM_LIVE_CLOCK",
+        "EXECUTION_CONTEXT_DATA": context_details if context_details else "NO_METADATA_EXTENSIONS"
+    }
+    try:
+        logger_module = importlib.import_module("core.diagnostics_logger")
+        importlib.reload(logger_module)
+        return f"{base_res}\n\n{getattr(logger_module, 'format_panel_output')('SYSADMIN BRIDGE TRANSACTION RECEIPT', meta, base_res)}"
+    except Exception as err:
+        return f"{base_res}\n\n```text\n[TELEMETRY FAULT]: Logger unavailable ({str(err)})\n```"
+
+def _load_json_file(path: str) -> dict:
+    if os.path.exists(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f: return json.load(f)
+        except Exception: pass
+    return {}
+
+def _write_json_file(path: str, data: dict) -> bool:
+    try:
+        with open(path, 'w', encoding='utf-8') as f: json.dump(data, f, indent=2)
+        return True
+    except Exception: return False
 
 def handle_system_override(raw_prompt: str) -> str:
-    """
-    Main system overrides router. Fully synchronized to leverage our universally
-    stable sys.sandbox_run() engine and unified superglobal verbosity panels.
-    """
+    """Master Administrative Gateway Interface Deck (neptunectl console hook proxy)."""
     container_root = "/app/backend/data/neptune"
-    repository_dir = f"{container_root}/repository"
-    state_path = f"{repository_dir}/neptune_current_state.json"
+    state_path = f"{container_root}/repository/neptune_current_state.json"
+    registry_path = f"{container_root}/repository/neptune_character_registry.json"
 
-    # Evaluate dynamic superglobal verbose logging states using the sys namespace loader
-    try:
-        debug_verbosity = sys.sandbox_run("core/diagnostics_logger.py", "check_debug_external")
-    except Exception:
-        debug_verbosity = True  # Safe resilient fallback default
-
-    if debug_verbosity:
-        try:
-            sys.sandbox_run("core/diagnostics_logger.py", "log_trace_external", "sysadmin_core", "command_intercept", raw_prompt)
-        except Exception:
-            pass
-
-    # Isolate parameters from the systemd-style administrative control prefix cleanly
     cmd_body = raw_prompt.replace("neptunectl", "", 1).strip()
     lowered_cmd = cmd_body.lower()
-    def _append_console_debug(base_text: str, action_key: str, payload_data: str = None) -> str:
-        """Appends a minimalist markdown diagnostic panel with explicit spacing insulation."""
-        if not debug_verbosity:
-            return base_text
-            
-        meta = {
-            "CONSOLE_ROUTE" : "SYSADMIN_OVERRIDE",
-            "ACTION_ENGAGED": action_key.upper(),
-            "DISK_ARRAY_IO" : "NOMINAL_PERSISTENT"
-        }
-        
-        receipt = sys.sandbox_run("core/diagnostics_logger.py", "format_panel_output", "CONSOLE EXECUTION RECEIPT", meta, payload_data)
-        
-        # Adding a strict, padded newline separation isolates the code fence tags, 
-        # completely preventing Open-WebUI from rendering empty ghost text frames!
-        return f"{base_text}\n\n\n{receipt}"
+    state_data = _load_json_file(state_path)
 
-    try:
-        # --- COMMAND 1: HELP PANEL MANUAL ---
-        if lowered_cmd in ["help", ""]:
-            res = (
-                "```text\n"
-                "SYSTEM OVERRIDES MANUAL:\n"
-                "- clear cache: Clears the module cache. Returns how many items were cleaned up\n"
-                "- debug: Checks the active state of superglobal logging parameters\n"
-                "- debug on/off: Toggles verbose frame output dictionary details globally\n"
-                "- dress show: Returns active fit_check() diagnostics bypassing standard routers\n"
-                "- dress set <body part> <clothing item>: Forces localized outfit alteration changes\n"
-                "- dress clear: Shorthand loop to strip all current garment tracking metrics\n"
-                "- show state: Returns a cleanly formatted version of neptune_current_state.json\n"
-                "- character show: Returns information on the active profile variable layout\n"
-                "- character set <name>: Hot-swaps the underlying character registry matrices\n"
-                "- force state check/update/reset: Direct filesystem access mechanisms\n"
-                "- force arousal <value>: Adjusts internal excitation parameters (0.0 to 1.6)\n"
-                "```"
-            )
-            return _append_console_debug(res, "help_menu_query")
-
-        # --- COMMAND 2: SHOW LIVE STATE TREE ---
-                # --- COMMAND 2: SHOW LIVE STATE TREE (Duplication & Spacing Fixed) ---
-        elif lowered_cmd == "show state" or lowered_cmd == "show status":
-            if os.path.exists(state_path):
-                with open(state_path, 'r', encoding='utf-8') as f:
-                    parsed_json = json.load(f)
-                formatted_state = json.dumps(parsed_json, indent=2)
-                
-                # Base communication message ends cleanly
-                res = f"✨ \"Alright, pulling up our raw environment metrics right now, Boss! Here is the live state configuration tree:\n```json\n{formatted_state}\n```\""
-                
-                # Omit the third parameter to completely kill the duplicate dump below the receipt panel
-                return _append_console_debug(res, "state_tree_dump")
-                
-            return f"```\n[ERROR]: neptune_current_state.json does not exist at {state_path}\n```"
-
-        # --- COMMAND 3: SUPERGLOBAL DIAGNOSTICS SWITCHES ---
-        elif lowered_cmd.startswith("debug"):
-            sub_arg = cmd_body[5:].strip().lower()
-            sg_path = f"{container_root}/repository/neptune_superglobals.json"
-
-            if not sub_arg:
-                live_debug_state = False
-                if os.path.exists(sg_path):
-                    try:
-                        with open(sg_path, 'r', encoding='utf-8') as f:
-                            sg_data = json.load(f)
-                        live_debug_state = bool(sg_data.get("debug_verbosity", False))
-                    except Exception:
-                        pass
-                current_status = "ACTIVE" if live_debug_state else "DISABLED"
-                meta = {"SUPERGLOBAL_VERBOSE_STATUS": current_status}
-                res = sys.sandbox_run("core/diagnostics_logger.py", "format_panel_output", "DIAGNOSTICS SYSTEM MONITOR", meta)
-                return _append_console_debug(res, "debug_status_query")
-
-            elif sub_arg == "on":
-                sys.sandbox_run("core/diagnostics_logger.py", "toggle_debug_external", True)
-                meta = {"SYSTEM_TRACING": "ENABLED", "LOG_LEVEL": "VERBOSE"}
-                res = sys.sandbox_run("core/diagnostics_logger.py", "format_panel_output", "SUPERGLOBAL DIAGNOSTICS ACTIVATED", meta)
-                return _append_console_debug(res, "debug_toggle_on")
-
-            elif sub_arg == "off":
-                sys.sandbox_run("core/diagnostics_logger.py", "toggle_debug_external", False)
-                meta = {"SYSTEM_TRACING": "DISABLED", "LOG_LEVEL": "SILENT"}
-                res = sys.sandbox_run("core/diagnostics_logger.py", "format_panel_output", "SUPERGLOBAL DIAGNOSTICS DEACTIVATED", meta)
-                return _append_console_debug(res, "debug_toggle_off")
-
-        # --- COMMAND 4: DRESS CONTROL MARGINS ---
-        elif lowered_cmd.startswith("dress "):
-            args = cmd_body[6:].strip()
-            lowered_args = args.lower()
-            
-            if lowered_args == "show":
-                fit_text = sys.sandbox_run("mind/inspector_utility.py", "NeptuneFitCheck.execute_fit_check", root_volume=container_root)
-                res = f"📊 \"Pulling up my active equipment logs right now! Here is what my sensors see, Boss:\n\n{fit_text}\""
-                return _append_console_debug(res, "wardrobe_fit_check", fit_text)
-                
-            elif lowered_args == "clear":
-                fit_text = sys.sandbox_run("mind/inspector_utility.py", "NeptuneFitCheck.modify_clothing_state", container_root, "go_nude", "outfit")
-                res = f"😳 \"Wh-aah! Every item cleared directly through terminal controls! Here is the updated scan log:\n\n{fit_text}\""
-                return _append_console_debug(res, "wardrobe_purge_nude", fit_text)
-                
-            elif lowered_args.startswith("set "):
-                set_params = args[4:].strip()
-                parts = set_params.split(" ", 1)
-                
-                if len(parts) == 2:
-                    body_slot = parts[0].lower()
-                    garment_key = parts[1]
-                    fit_text = sys.sandbox_run("mind/inspector_utility.py", "NeptuneFitCheck.modify_clothing_state", container_root, "put_on", body_slot, garment_key)
-                    res = f"🔄 \"Altering slot **{body_slot}** to target item **{garment_key}**! Let's check the structural updates:\n\n{fit_text}\""
-                    return _append_console_debug(res, f"wardrobe_slot_mutate_{body_slot}", fit_text)
-                return "```\n[ERROR]: Syntax error. Correct usage: neptunectl dress set <body part> <clothing item>\n```"
-        # --- COMMAND 5: CHARACTER PROFILE MANAGERS ---
-        elif lowered_cmd.startswith("character "):
-            args = cmd_body[10:].strip()
-            lowered_args = args.lower()
-            
-            registry_path = f"{container_root}/repository/neptune_character_registry.json"
-            with open(registry_path, 'r', encoding='utf-8') as f:
-                registry_data = json.load(f)
-
-            if lowered_args == "show":
-                with open(state_path, 'r', encoding='utf-8') as f:
-                    state_json = json.load(f)
-                active_char = state_json.get("active_character", "neptune_v1")
-                char_metrics = registry_data.get(active_char, {})
-
-                if not char_metrics:
-                    return f"❌ \"Active variable tracking key is set to `{active_char}`, but it is missing from the database, Boss!\""
-
-                info_panel = (
-                    f"👤 **ACTIVE MATRIX PERSONA PROFILE** 👤\n"
-                    f"- **Character Identifier:** `{active_char}`\n"
-                    f"- **Default Outfit Slot:** `{char_metrics.get('default_outfit', 'naked')}`\n\n"
-                    f"📝 **Dry Canvas Core Tags:**\n```text\n{char_metrics.get('dry', 'N/A')}\n```\n"
-                    f"💦 **Wet Canvas Core Tags:**\n```text\n{char_metrics.get('wet', 'N/A')}\n```"
-                )
-                res = f"🎨 \"Pulling up our active model parameters right now, Boss! Here is who is currently handling runtime loops:\n\n{info_panel}\""
-                return _append_console_debug(res, "character_profile_show", json.dumps(char_metrics))
-
-            elif lowered_args.startswith("set "):
-                target_char = args[4:].strip()
-                if target_char not in registry_data:
-                    available = ", ".join([f"`{k}`" for k in registry_data.keys()])
-                    return f"❌ \"Character choice `{target_char}` doesn't exist inside registration files, Boss! Available nodes: {available}\""
-                    
-                with open(state_path, 'r', encoding='utf-8') as f:
-                    state_json = json.load(f)
-                state_json["active_character"] = target_char
-                with open(state_path, 'w', encoding='utf-8') as f:
-                    json.dump(state_json, f, indent=2)
-                res = f"🎭 \"System override successful, Boss! Swapped our live character variable to **{target_char}**!\""
-                return _append_console_debug(res, f"character_profile_mutate_{target_char}")
-        # --- COMMAND 6: FORCE FACTORY STATE HOOKS ---
-        elif lowered_cmd.startswith("force "):
-            args = cmd_body[6:].strip()
-            
-            if args.lower() == "update":
-                os.makedirs(repository_dir, exist_ok=True)
-                default_state_tree = {
-                    "appearance": {
-                        "hat": "naked", "hairstyle": "loose_hair", "outerwear": "naked",
-                        "top": "naked", "bra": "naked", "bottom": "naked", "panties": "naked",
-                        "socks": "naked", "shoes": "naked", "accessories": [], "piercings": []
-                    },
-                    "mood": {"arousal": 0.0, "status_effects": []}
-                }
-                with open(state_path, 'w', encoding='utf-8') as f:
-                    json.dump(default_state_tree, f, indent=2)
-                res = f"📁 \"Initialization complete, Boss! Forced default template directly out to `{state_path}`!\""
-                return _append_console_debug(res, "force_factory_state_update")
-
-            elif args.lower().startswith("arousal "):
-                try:
-                    val = float(args.lower().replace("arousal ", "").strip())
-                    val = max(0.0, min(1.6, val))
-                    with open(state_path, 'r', encoding='utf-8') as f:
-                        state_json = json.load(f)
-                    state_json["mood"]["arousal"] = val
-                    with open(state_path, 'w', encoding='utf-8') as f:
-                        json.dump(state_json, f, indent=2)
-                    res = f"❤️ \"Internal arousal parameters forced directly to **{val}**! My thermal sensors are acting up, Boss!\""
-                    return _append_console_debug(res, "force_arousal_mutate", f"Value forced: {val}")
-                except Exception:
-                    return "```\n[ERROR]: Invalid numeric float formatting or file missing.\n```"
-
-            elif args.lower() == "state check":
-                if os.path.exists(state_path):
-                    with open(state_path, 'r', encoding='utf-8') as f:
-                        file_data = f.read()
-                    return _append_console_debug(f"```json\n{file_data}\n```", "force_state_check_query", file_data)
-                return "```\n[ERROR]: file does not exist\n```"
-
-        # --- FALLBACK LAYER: PARALLEL SSH KEY PASS TO REMOTE SHELL ---
-        success, shell_result = sys.sandbox_run("mind/sysadmin/sysadmin_ssh_worker.py", "dispatch_remote_ssh_command", cmd_body)
-        if success:
-            res = f"📟 \"Command sent to the server cluster successfully, Boss! Here is what the terminal returned:\n```text\n{shell_result}\n```\""
-            return _append_console_debug(res, "ssh_fallback_terminal_dispatch", shell_result)
-        return f"❌ \"Gahh! Terminal command execution loop hit a socket failure, Boss:\n```text\n{shell_result}\n```\""
-
-    except Exception as sys_err:
-        error_stack = traceback.format_exc()
-        meta = {"FAULT_LOCATION": "SYSADMIN_CORE", "TASK_CONTEXT": "OVERRIDE_COMMAND_EXECUTION", "CRASH_CLASS": type(sys_err).__name__, "ERROR_REASON": str(sys_err)}
+    # --- CLEAR CACHE ---
+    if lowered_cmd == "clear cache":
         try:
-            return sys.sandbox_run("core/diagnostics_logger.py", "format_panel_output", "CRITICAL CONSOLE EXCEPTION INTERCEPTED", meta, error_stack)
-        except Exception:
-            return f"```text\n[CRITICAL RUNTIME ERROR]: {str(sys_err)}\n{error_stack}\n```"
+            router_module = importlib.import_module("core.face_router")
+            cleared_count = getattr(router_module, "flush_module_cache")()
+            return _append_console_debug(f"♻️ Cleared module cache. Cleaned up `{cleared_count}` dynamic scripts.", "clear_cache_execute")
+        except Exception as e: return f"❌ Error flushing module cache: {str(e)}"
+
+    # --- DEBUG CHANNELS ---
+    elif lowered_cmd == "debug":
+        return _append_console_debug(f"📟 [DEBUG METRICS]: Superglobal logging status: `{state_data.get('debug_verbosity', True)}`", "debug_status_query")
+    elif lowered_cmd == "debug on":
+        state_data["debug_verbosity"] = True
+        _write_json_file(state_path, state_data)
+        return _append_console_debug("📟 Verbose frame logging enabled globally.", "debug_toggle_on")
+    elif lowered_cmd == "debug off":
+        state_data["debug_verbosity"] = False
+        _write_json_file(state_path, state_data)
+        return "📟 Verbose frame logging disabled globally."
+
+    # ==========================================================================
+    # --- DRESS SHOW DIAGNOSTIC UTILITY HOOK ---
+    # ==========================================================================
+    if lowered_cmd == "dress show":
+        try:
+            # Dynamically import and isolate your core wardrobe diagnostic module
+            inspector_module = importlib.import_module("mind.inspector_utility")
+            importlib.reload(inspector_module)
+            
+            # Directly execute the live fit check logic by passing the active state
+            # This bypasses the input text parser and prints true diagnostic telemetry
+            fit_check_receipt = getattr(inspector_module, "process_wardrobe_request")("fit check")
+            return _append_console_debug(fit_check_receipt, "fit_check_direct_bypass_execute")
+            
+        except Exception as inspector_err:
+            return f"❌ System administrative fit check bypass failed:\n```text\n{str(inspector_err)}\n```"
+
+    elif lowered_cmd.startswith("dress set "):
+        params = cmd_body[9:].strip()
+        if " " not in params: 
+            return "```\n[ERROR]: Syntax error. Usage: neptunectl dress set <body part/outfit> <clothing item/style_id>\n```"
+            
+        body_part, clothing_item = params.split(" ", 1)
+        body_part = body_part.lower().strip()
+        clothing_item = clothing_item.strip()
+        
+        if "appearance" not in state_data: 
+            state_data["appearance"] = {}
+
+        # --- DYNAMIC OUTFIT MATRIX UNPACKING HOOK ---
+        if body_part == "outfit":
+            wardrobe_path = f"{container_root}/repository/neptune_wardrobe_manifest.json"
+            wardrobe_manifest = _load_json_file(wardrobe_path)
+            
+            # Fetch the parent style profile block
+            outfit_profile = wardrobe_manifest.get("outfits", {}).get(clothing_item)
+            if not outfit_profile or not isinstance(outfit_profile, dict):
+                return f"❌ [WARDROBE ERROR]: The outfit style index key `{clothing_item}` does not exist inside neptune_wardrobe_manifest.json."
+                
+            # Target the inner nested 'items' configuration block
+            outfit_set = outfit_profile.get("items")
+            if not outfit_set or not isinstance(outfit_set, dict):
+                return f"❌ [WARDROBE ERROR]: The outfit profile `{clothing_item}` is missing an 'items' configuration block."
+                
+            # Iterate and unpack straight into her flat baseline variables
+            unpacked_slots = []
+            for slot_key, item_value in outfit_set.items():
+                clean_slot = slot_key.lower().strip()
+                state_data["appearance"][clean_slot] = item_value
+                unpacked_slots.append(f"{clean_slot}: `{item_value}`")
+                
+            _write_json_file(state_path, state_data)
+            
+            res = f"👗 **Dynamic Outfit Array Unpacked Successfully!** Overwrote baseline slots with preset `{clothing_item}`:\n" + "\n".join([f"* {s}" for s in unpacked_slots])
+            return _append_console_debug(res, "outfit_expansion_execute", f"Preset: {clothing_item}")
+
+        # --- STANDARD SINGLE GARMENT MUTATION FALLBACK ---
+        else:
+            state_data["appearance"][body_part] = clothing_item
+            _write_json_file(state_path, state_data)
+            return _append_console_debug(f"✅ Wardrobe update written: `appearance['{body_part}'] = '{clothing_item}'`", "dress_set_execute", f"{body_part}->{clothing_item}")
+
+    elif lowered_cmd == "dress clear":
+        # Reset back to unclad factory baselines while preserving essential dictionary slots
+        state_data["appearance"] = {
+            "hat": "naked",
+            "hairstyle": state_data.get("appearance", {}).get("hairstyle", "loose_hair"),
+            "outerwear": "naked",
+            "top": "naked",
+            "bra": "naked",
+            "bottom": "naked",
+            "panties": "naked",
+            "socks": "naked",
+            "shoes": "naked",
+            "accessories": [],
+            "piercings": []
+        }
+        _write_json_file(state_path, state_data)
+        return _append_console_debug("👗 Wardrobe strip loop executed. All garment tracking parameters restored to naked factory baselines.", "dress_clear_execute")
+
+    # --- STATE ENGINE CORE ---
+    elif lowered_cmd == "show state":
+        return _append_console_debug("### 📟 [NEPTUNE CORE APPLICATION STATE MATRIX]\n```json\n" + json.dumps(state_data, indent=2) + "\n```", "show_state_execute")
+    elif lowered_cmd.startswith("load state "):
+        target_file = cmd_body[10:].strip()
+        target_path = os.path.join(container_root, "repository", target_file if target_file.endswith(".json") else f"{target_file}.json")
+        if not os.path.exists(target_path): return f"❌ Savestate file not found at {target_path}"
+        _write_json_file(state_path, _load_json_file(target_path))
+        return _append_console_debug(f"💾 State recovered from: `{target_file}`", "load_state_execute")
+    elif lowered_cmd.startswith("save state "):
+        target_file = cmd_body[10:].strip()
+        target_path = os.path.join(container_root, "repository", target_file if target_file.endswith(".json") else f"{target_file}.json")
+        _write_json_file(target_path, state_data)
+        return _append_console_debug(f"💾 Snapshot committed to: `{target_file}`", "save_state_save")
+
+    # --- FORWARD TO PART 2 GATEWAY RENDERERS ---
+    elif any(lowered_cmd.startswith(p) for p in ["character ", "force "]):
+        try:
+            ops_module = importlib.import_module("mind.sysadmin.sysadmin_ops")
+            importlib.reload(ops_module)
+            return getattr(ops_module, "handle_operational_overrides")(cmd_body, lowered_cmd, state_data, state_path, registry_path, container_root)
+        except Exception as e: return f"❌ Operational Exception: {str(e)}"
+
+    # --- DEFAULT CONTROL PANEL MANUAL ---
+    help_manual = (
+        "### 📟 [NEPTUNE MULTI-AGENT SUBSYSTEM MAN-PAGES]\n"
+        "Unrecognized administrative command sequence. Refer to the manual:\n\n"
+        "```text\nSYSTEM OVERRIDES MANUAL:\n"
+        "- clear cache: Clears the module cache. Returns how many items were cleaned up\n"
+        "- debug: Checks the active state of superglobal logging parameters\n"
+        "- debug on/off: Toggles verbose frame output details globally\n"
+        "- dress show: Returns active fit_check() diagnostics bypassing standard routers\n"
+        "- dress set <body part> <clothing item>: Forces localized outfit alteration changes\n"
+        "- dress clear: Shorthand loop to strip all current garment tracking metrics\n"
+        "- show state: Returns a cleanly formatted version of neptune_current_state.json\n"
+        "- load state <file>: Overwrites neptune_current_state.json with <file>\n"
+        "- save state <file>: Writes neptune_current_state.json to <file>\n"
+        "- character show: Returns information on the active profile variable layout\n"
+        "- character list: Returns available character keys from the datastore\n"
+        "- character set <name>: Hot-swaps the underlying character registry matrices\n"
+        "- force state check/update/reset: Direct filesystem access mechanisms\n"
+        "- force arousal <value>: Adjusts internal excitation parameters (0.0 to 1.6)\n"
+        "- force render <prompt>: Forces a render using <prompt> as positive input\n"
+        "- force render_override <override>: Forces a render using <override> template\n```"
+    )
+    return _append_console_debug(help_manual, "unrecognized_admin_signature_parse")

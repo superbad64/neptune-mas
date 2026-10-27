@@ -14,6 +14,11 @@
     },
     "mood": {
         "arousal": 0.0,
+        "self_arousal": 0.0,
+        "active_character": "neptune_v1",
+        "last_prompt": "",
+        "session_start_time": 0.0,
+        "close_warning": "",
         "status_effects": []
     }
 }

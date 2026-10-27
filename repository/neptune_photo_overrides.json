@@ -49,15 +49,15 @@
 		},
 		{
 			"id": "show_breasts",
-			"trigger_keywords": ["show me your tits", "show tits", "show breasts", "topless"],
+			"trigger_keywords": ["show me your tits", "show your tits", "show breasts", "topless"],
 			"camera_override": "sensual upper body portrait shot focusing heavily on exposed chest, entirely topless breasts, {active_angle}, naked upper torso",
 			"location_override": null,
-			"negative_override": "suspenders, overalls, straps crossing chest, bra, shirt, covering breasts, clothes",
+			"negative_override": "{selfie_perspective}, {active_angle}, upper-body mid-shot portrait framing",
 			"pose_pool": [
-				"lying on her back, on her bed, from above",
-				"sitting on the edge of her bed, from the front",
-				"sitting on the edge of her bed, from the left side",
-				"sitting on the edge of her bed, from the right side"
+				"lying back on her unmade bed from an overhead angle, looking up into the smartphone lens while holding the phone up with one extended hand, completely topless, bare breasts exposed, naked upper torso, casual relaxed posture",
+				"sitting on the edge of her bed, from the front, looking up into the smartphone lens while holding the phone up with one extended hand, completely topless, bare breasts exposed, naked upper torso, casual relaxed posture",
+				"sitting on the edge of her bed, from the left side, looking up into the smartphone lens while holding the phone up with one extended hand, completely topless, bare breasts exposed, naked upper torso, casual relaxed posture",
+				"sitting on the edge of her bed, from the right side, looking up into the smartphone lens while holding the phone up with one extended hand, completely topless, bare breasts exposed, naked upper torso, casual relaxed posture"
 			],
 			"strip_slots": ["top", "bra", "outerwear"],
 			"state_mutations": {
@@ -77,7 +77,7 @@
 		},
 		{
 			"id": "show_crotch",
-			"trigger_keywords": ["show me your pussy", "show pussy", "spread your legs", "expose your crotch"],
+			"trigger_keywords": ["show me your pussy", "show your pussy", "spread your legs", "expose your crotch", "send me a nude", "send a nude"],
 			"camera_override": "extreme close-up macro focus explicit view highlighting exposed pussy",
 			"location_override": "(lying wide open completely on top of a messy unmade bed:1.4)",
 			"negative_override": "underwear, panties, pants, clothes, fabric covering crotch",
@@ -103,14 +103,13 @@
 		},
 		{
 			"id": "show_feet",
-			"trigger_keywords": ["show me your feet", "show feet", "bare feet", "show toes"],
-			"camera_override": "first-person point-of-view macro down-shot perspective focusing completely on bare feet and naked toes, looking down from POV",
-			"location_override": null,
-			"negative_override": "shoes, boots, socks, hosiery, slippers",
+			"trigger_keywords": ["show your feet", "show me your feet", "feet picture", "send toes"],
+			"camera_override": "extreme close-up macro perspective focus, wide angle lens, feet close to lens",
 			"pose_pool": [
-				"standing style, toes wiggling",
-				"sitting down, feet extended out towards foreground"
+				"A casual selfie perspective composition, sitting back on a couch with both legs extended straight out forward directly towards the camera lens, her bare feet and naked toes occupying the absolute foreground of the image and appearing large due to wide-angle depth, her upper body visible in the background, hands resting far back on the couch cushions behind her hips",
+				"first-person POV looking down at her own bare feet and naked toes resting on a soft rug, looking down at her feet, (legs emerging directly from the bottom edge of the frame:1.45), upper body completely out of frame, top-down viewpoint"
 			],
+			"negative_override": "hands touching feet, fingers covering toes, cross-legged, feet tucked under, hands on feet, blocked view, obscured foreground",
 			"strip_slots": ["socks", "shoes"],
 			"state_mutations": {
 				"arousal_max_chance": 0.0,
@@ -168,6 +167,27 @@
 				"H-hey! S-senpai, what are you doing with that lens camera setup out there?! 😳 Turn around! Giggles... *blushes softly*",
 				"The steam is getting so thick in here... 🌊 I-is the resolution framing capturing my skin textures properly from that angle, senpai? 💕",
 				"Washing off after a long training session... feels amazing! Don't stare too long or I'll split the door open and drag you in! 😉💕"
+			]
+		},
+		{
+			"id": "masturbate",
+			"trigger_keywords": ["start masturbating", "touch yourself", "finger yourself", "masturbate"],
+			"camera_override": "sensual close-up focus on hand placement, shifting positions, heavy blushing face tracking",
+			"location_override": null,
+			"negative_override": "pants, underwear, fabrics blocking fingers, phone visible",
+			"pose_pool": [
+				"lying on her back on her unmade bed, left hand covering blushing face, right hand touching crotch",
+				"sitting on the edge of the bed, knees drawn close, breathing heavily"
+			],
+			"strip_slots": ["top", "bra", "panties", "bottom", "socks", "shoes", "outerwear", "hats"],
+			"state_mutations": {
+				"arousal_max_chance": 0.4,
+				"arousal_increase": 0.15,
+				"wetness_state": "dripping wet"
+			},
+			"response_pool": [
+				"U-ugh... y-you're seriously making me do this right now while you watch?! 🫣 A-arousal parameters are going out of bounds... fine, look all you want! 💕",
+				"N-nnh... s-senpai, it feels so warm... *blushes completely crimson*... I-I'm touching myself just like you ordered... o_o; 💕"
 			]
 		}
 	]

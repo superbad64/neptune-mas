@@ -100,3 +100,53 @@ def log_crash_external(module_name: str, action_context: str, exception_obj: Exc
     }
     error_stack = traceback.format_exc()
     return format_panel_output("CRITICAL RUNTIME EXCEPTION CAUGHT", meta, error_stack)
+
+import re
+
+class NeptuneSpiceClassifier:
+    @staticmethod
+    def classify_prompt_spice(prompt: str) -> str:
+        """
+        Analyzes the user's prompt lexical footprints to return a scannable
+        spiciness rating visual anchor for the markdown debug interface panels.
+        """
+        clean_text = prompt.lower().strip()
+        
+        # Explicit/High-Arousal Triggers
+        spicy_3 = ["fuck", "rail", "lick", "suck", "harder", "masturbate", "touch yourself", "finger", "cum", "orgasm"]
+        # Suggestive/Override Triggers
+        spicy_2 = ["tits", "breasts", "pussy", "crotch", "ass", "buttocks", "topless", "naked", "shower view"]
+        # Light Compliments/Fit Checks
+        spicy_1 = ["cute", "pretty", "beautiful", "good girl", "love you", "adorable", "fit check", "feet", "toes"]
+
+        if any(w in clean_text for w in spicy_3):
+            return "🌶️🌶️🌶️ [LEVEL 3: HYPER-SPICY]"
+        elif any(w in clean_text for w in spicy_2):
+            return "🌶️🌶️ [LEVEL 2: SUGGESTIVE]"
+        elif any(w in clean_text for w in spicy_1):
+            return "🌶️ [LEVEL 1: MILD]"
+        
+        return "[LEVEL 0: CLEAR]"
+
+    def log_input_trace(self, prompt: str) -> str:
+        """
+        Generates pristine, noise-free Markdown panels for trace outputs
+        with structural backtick boundaries to keep Open-WebUI stable.
+        """
+        spice_rating = self.classify_prompt_spice(prompt)
+        
+        markdown_panel = (
+            f"\n\n```text\n"
+            f"[NEPTUNECTL: LINGUISTIC INBOUND TRACE]\n"
+            f"INPUT     -> \"{prompt}\"\n"
+            f"SPICE RATING -> {spice_rating}\n"
+            f"```\n\n"
+        )
+        return markdown_panel
+
+# ================================================================================
+# TOP LEVEL EXPORT HOOK WRAPPER FOR FAILOVER MANIFEST SANDBOX UNIT TESTING
+# ================================================================================
+def classify_prompt_spice(prompt: str) -> str:
+    """Standalone wrapper proxy mapping dot-notation scopes to a flat dictionary key."""
+    return NeptuneSpiceClassifier.classify_prompt_spice(prompt)

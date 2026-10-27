@@ -1,115 +1,161 @@
 import os
 import sys
 import json
-import traceback
+import importlib
+from typing import Dict, Any, Tuple, Optional
+
+
+def flush_module_cache() -> int:
+    """Clears cached multi-agent subsystem modules to guarantee clean disk reloads."""
+    modules_to_clear = [
+        mod
+        for mod in list(sys.modules.keys())
+        if any(
+            mod.startswith(prefix) for prefix in ["mind.", "body.", "soul.", "core."]
+        )
+    ]
+    for mod in modules_to_clear:
+        del sys.modules[mod]
+    return len(modules_to_clear)
 
 
 class Pipe:
     def __init__(self):
-        self.root = "/app/backend/neptune"
-        self.code_root = "/app/backend/data/neptune"
+        self.root = "/app/backend/data/neptune"
+
+        # --- FIXED: Absolute path injection to preserve module tree on reboots ---
+        if self.root not in sys.path:
+            sys.path.insert(0, self.root)
 
         self.paths = {
-            "state": f"{self.root}/repository/neptune_current_state.json",
-            "overrides": f"{self.root}/repository/neptune_system_overrides.json",
-            "registry": f"{self.root}/repository/neptune_character_registry.json",
-            "wardrobe": f"{self.root}/repository/neptune_wardrobe_manifest.json",
-            "photo_engine": f"{self.root}/repository/neptune_photo_engine.json",
-            "photo_overrides": f"{self.root}/repository/neptune_photo_overrides.json",
+            k: f"{self.root}/repository/neptune_{k}.json"
+            for k in [
+                "state",
+                "overrides",
+                "registry",
+                "wardrobe",
+                "photo_engine",
+                "photo_overrides",
+                "superglobals",
+            ]
         }
-
-        self.slang_map = {
-            "titties": "breasts",
-            "boobs": "breasts",
-            "pussy": "pussy",
-            "snap": "picture",
-            "pic": "picture",
-            "selfie": "selfie",
-            "brb": "be right back",
-            "idk": "i do not know",
-            "gonna": "going to",
-            "dunno": "do not know",
-            "wanna": "want to",
-            "fr fr": "seriously",
-            "no cap": "honestly",
-        }
-
-        sys.sandbox_run = self._execute_custom_module
+        flush_module_cache()
 
     def _execute_custom_module(
         self, relative_script_path: str, function_name: str, *args, **kwargs
     ):
-        """Master Sandbox Runner. Reads scripts fresh from disk arrays."""
-        import requests
+        full_path = os.path.join(self.root, relative_script_path)
+        if not os.path.exists(full_path):
+            return f"System Error: Script not found at {full_path}"
 
-        full_script_path = os.path.join(self.code_root, relative_script_path)
-        if not os.path.exists(full_script_path):
-            return f"System Error: Script not found on disk array layout at {full_script_path}"
-
-        with open(full_script_path, "r", encoding="utf-8") as f:
-            script_source = f.read()
+        dir_name = os.path.dirname(full_path)
+        if dir_name not in sys.path:
+            sys.path.insert(0, dir_name)
 
         try:
-            unified_context = {
-                "__builtins__": __builtins__,
-                "os": os,
-                "json": json,
-                "sys": sys,
-                "traceback": traceback,
-                "requests": requests,
-            }
-            exec(script_source, unified_context, unified_context)
+            module_notation = relative_script_path.replace("/", ".")
+            if module_notation.endswith(".py"):
+                module_notation = module_notation[:-3]
+            module = importlib.import_module(module_notation)
+            importlib.reload(module)
 
             if "." in function_name:
                 class_name, method_name = function_name.split(".", 1)
-                if class_name not in unified_context:
-                    return f"System Error: Class '{class_name}' was not found on the memory sheet."
-                init_volume = kwargs.pop("root_volume", None) or kwargs.pop(
-                    "container_root", None
-                )
-                method_args = list(args)
-                if (
-                    not init_volume
-                    and method_args
-                    and isinstance(method_args[0], str)
-                    and method_args[0].startswith("/app")
-                ):
-                    init_volume = method_args.pop(0)
-                class_instance = (
-                    unified_context[class_name](root_volume=init_volume)
-                    if init_volume
-                    else unified_context[class_name]()
-                )
-                target_method = getattr(class_instance, method_name, None)
-                if not target_method:
-                    return f"System Error: Method '{method_name}' not found on Class '{class_name}'."
-                return target_method(*method_args, **kwargs)
+                cls = getattr(module, class_name)
 
-            if function_name in unified_context:
-                return unified_context[function_name](*args, **kwargs)
-            return f"System Error: Target entrypoint '{function_name}' was not found on the memory sheet."
+                if class_name == "NeptuneChatterCore":
+                    state_file = self.paths.get("state")
+                    instance = cls(state_json_path=state_file)
+                else:
+                    instance = cls()
+
+                spice = getattr(module, "classify_prompt_spice", None)
+                if spice and "prompt" in kwargs:
+                    spice(kwargs["prompt"])
+
+                return getattr(instance, method_name)(*args, **kwargs)
+
+            return getattr(module, function_name)(*args, **kwargs)
         except Exception as e:
-            return f"Neptune System Error inside sandbox execution: {str(e)}"
+            # --- FIXED: EXTRACT THE DEEP NESTED SUB-MODULE CRASH TRACE ---
+            if self.paths["superglobals"]["debug_verbose"]:
+                tb = traceback.format_exc()
+                return f"❌ ```\n[NEPTUNE SUB-MODULE SANDBOX CRASH DETECTED]\nScript: {relative_script_path} -> {function_name}\nError: {str(e)}\n\nFull Stack Traceback:\n{tb}\n```"
+            else:
+                return f"Neptune System Error inside sandbox execution: {str(e)}"
 
-    def _load_datastore(self, key: str) -> dict:
-        """Reads database matrices cleanly without modifying files."""
-        path = self.paths.get(key)
-        if not path or not os.path.exists(path):
-            return {}
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return {}
+    def _get_exhaustive_slang_map(self) -> dict:
+        return {
+            "titties": "breasts",
+            "tits": "breasts",
+            "boobs": "breasts",
+            "boobies": "breasts",
+            "bazoongas": "breasts",
+            "rack": "breasts",
+            "chest": "breasts",
+            "vagina": "pussy",
+            "cunt": "pussy",
+            "cooch": "pussy",
+            "coochie": "pussy",
+            "slit": "pussy",
+            "ass": "butt",
+            "booty": "butt",
+            "tush": "butt",
+            "bum": "butt",
+            "snap": "picture",
+            "pic": "picture",
+            "pics": "pictures",
+            "selfie": "picture",
+            "selfies": "pictures",
+            "photo": "picture",
+            "photos": "pictures",
+            "photograph": "picture",
+            "shot": "picture",
+            "vid": "video",
+            "vids": "video",
+            "clip": "video",
+            "brb": "be right back",
+            "idk": "i do not know",
+            "dunno": "do not know",
+            "gonna": "going to",
+            "wanna": "want to",
+            "gotta": "have to",
+            "fr fr": "seriously",
+            "no cap": "honestly",
+            "imho": "in my honest opinion",
+            "imo": "in my opinion",
+            "tbh": "to be honest",
+            "smh": "shaking my head",
+            "omg": "oh my god",
+            "irl": "in real life",
+            "btw": "by the way",
+            "afk": "away from keyboard",
+            "jk": "just kidding",
+            "nvm": "nevermind",
+            "lmao": "laughing my ass off",
+            "rofl": "rolling on the floor laughing",
+            "wtf": "what the fuck",
+            "wth": "what the hell",
+            "u": "you",
+            "r": "are",
+            "ur": "your",
+            "b4": "before",
+            "cuz": "because",
+            "cause": "because",
+            "plz": "please",
+            "pls": "please",
+            "thx": "thanks",
+            "ty": "thank you",
+        }
 
     def translate_slang(self, text: str) -> str:
-        """Step 1 Global Preprocessor text standardizer."""
+        slang_dictionary = self._get_exhaustive_slang_map()
         words = text.split()
         processed = []
         for word in words:
             clean = word.lower().strip(".,!?\"';:")
-            if clean in self.slang_map:
-                substituted = self.slang_map[clean]
+            if clean in slang_dictionary:
+                substituted = slang_dictionary[clean]
                 if word[-1] in [".", ",", "!", "?", ":", ";"]:
                     substituted += word[-1]
                 processed.append(substituted)
@@ -117,152 +163,147 @@ class Pipe:
                 processed.append(word)
         return " ".join(processed)
 
-    def _append_routing_receipt(
-        self, base_res: str, target: str, reason: str, tokens: list
-    ) -> str:
-        """Appends our clean uniform receipt block if debug_verbosity is enabled."""
-        try:
-            debug_active = sys.sandbox_run(
-                "core/diagnostics_logger.py", "check_debug_external"
-            )
-        except Exception:
-            debug_active = True
-
-        if not debug_active:
-            return base_res
-
-        meta = {
-            "ROUTING_TARGET": target.upper(),
-            "MATCH_REASON": reason,
-            "EVAL_TOKENS": json.dumps(tokens),
-        }
-        receipt_panel = sys.sandbox_run(
-            "core/diagnostics_logger.py",
-            "format_panel_output",
-            "FACE ROUTER ACTION RECEIPT",
-            meta,
-        )
-        return f"{base_res}\n\n{receipt_panel}"
-
     def pipe(self, body: dict) -> str:
-        """Main entrance controller router loop with organic keyword intent interception."""
         try:
             messages = body.get("messages", [])
             if not messages:
-                return "System Error: Face interface received an empty payload stream."
+                return "╰(•̀ ── •́)╯ Error: Payload empty!"
 
             raw_prompt = messages[-1].get("content", "").strip()
 
-            # --- RULE 1: Immediate Admin Intercept Check ---
+            # --- STEP 1: Admin Command Intercept Layer ---
             if raw_prompt.lower().startswith("neptunectl"):
                 return self._execute_custom_module(
-                    relative_script_path="mind/sysadmin/sysadmin_core.py",
-                    function_name="handle_system_override",
-                    raw_prompt=raw_prompt
+                    "mind/sysadmin/sysadmin_core.py",
+                    "handle_system_override",
+                    raw_prompt=raw_prompt,
                 )
 
-            # Step 1 Pipeline Pass: Normalize the incoming input string
+            # --- STEP 2: Slang Translation Engine ---
             sanitized_prompt = self.translate_slang(raw_prompt)
             lowered_sanitized = sanitized_prompt.lower()
 
-            # --- RULE 1.5: ORGANIC WARDROBE INTENT INTERCEPTOR (Trigger-Array Aligned) ---
-            put_on_keywords = ["put on", "equip", "dress in", "change into"]
-            remove_keywords = ["remove", "take off", "strip", "undress"]
-            nude_keywords   = ["go nude", "get naked", "strip naked", "take everything off"]
-            
-            matched_intent = None
-            matched_phrase = None
-            
-            if any(p in lowered_sanitized for p in nude_keywords):
-                matched_intent = "go_nude"
-                matched_phrase = "go_nude_intent"
-            elif any(p in lowered_sanitized for p in put_on_keywords):
-                matched_intent = "put_on"
-                matched_phrase = "put_on_intent"
-            elif any(p in lowered_sanitized for p in remove_keywords):
-                matched_intent = "remove"
-                matched_phrase = "remove_intent"
+            # --- FIXED: REMOVE EMOTICONS & SYMBOLS FOR MATCH ALIGNMENT ---
+            # Strips out casual symbols like :), :D, <3, or trailing punctuation marks completely
+            clean_match_string = lowered_sanitized
+            for symbol in [":)", ":d", "<3", ":p", ";)", ":(", "!", "?", ".", ",", "-"]:
+                clean_match_string = clean_match_string.replace(symbol, "")
+            clean_match_string = " ".join(clean_match_string.split()).strip()
 
-            if matched_intent:
-                print(f"[THE FACE INTERCEPTOR] Evaluating wardrobe intent branch: {matched_intent}")
-                container_root = "/app/backend/data/neptune"
-                wardrobe = self._load_datastore("wardrobe")
-                
-                target_slot = None
-                target_item = None
-                
-                if matched_intent == "go_nude":
-                    target_slot = "outfit"
-                    target_item = "naked"
-                else:
-                    # Scan manifest trees across all standard inventory directories
-                    for slot_category in ["tops", "bottoms", "bras", "panties", "socks", "shoes", "outerwear", "hats", "outfits"]:
-                        for item_key, item_data in wardrobe.get(slot_category, {}).items():
-                            # Extract aliases out of the nested triggers database array natively
-                            aliases = item_data.get("triggers", []) if isinstance(item_data, dict) else []
-                            
-                            # Check root keys, space-cleaned keys, and explicit alias trigger listings
-                            if (item_key in lowered_sanitized or 
-                                item_key.replace("_", " ") in lowered_sanitized or 
-                                any(alias.lower() in lowered_sanitized for alias in aliases)):
-                                
-                                target_item = item_key
-                                target_slot = slot_category.rstrip('s') if slot_category != "panties" else "panties"
-                                break
-                        if target_item:
+            # --- STEP 3: High-Priority Photo Overrides Cross-Check ---
+            is_imgen = False
+            overrides_path = self.paths.get("photo_overrides")
+            if os.path.exists(overrides_path):
+                try:
+                    with open(overrides_path, "r", encoding="utf-8") as f:
+                        ov_data = json.load(f)
+
+                    keyword_tuples = []
+                    for item in ov_data.get("overrides", []):
+                        for kw in item.get("trigger_keywords", []):
+                            keyword_tuples.append((kw.lower().strip(), item))
+
+                    keyword_tuples.sort(key=lambda x: len(x[0]), reverse=True)
+
+                    for kw, item in keyword_tuples:
+                        # Match against our clean_match_string instead of the raw dirty prompt
+                        if kw in clean_match_string:
+                            print(
+                                f"[ROUTER INTERCEPT] Priority match achieved: {item['id']} via '{kw}'"
+                            )
+                            is_imgen = True
                             break
-
-                # GATED SUB-MUTATION CONTEXT: Clear the file edit if a genuine item/outfit target matched
-                if target_item and target_slot:
-                    fit_output = self._execute_custom_module(
-                        relative_script_path="mind/inspector_utility.py",
-                        function_name="NeptuneFitCheck.modify_clothing_state",
-                        root_volume=container_root,
-                        action=matched_intent,
-                        body_part=target_slot,
-                        target_item=target_item
+                except Exception as e:
+                    print(
+                        f"[ROUTER WARNING] Photo overrides parsing check failed: {str(e)}"
                     )
-                    return self._append_routing_receipt(
-                        fit_output, 
-                        "wardrobe_engine", 
-                        f"Organic entity validation pass cleared for slot '{target_slot}' = '{target_item}'", 
-                        [matched_intent, target_slot, target_item]
-                    )
-                else:
-                    print("[THE FACE INTERCEPTOR] Intent triggered but zero verified wardrobe items matched. Falling through.")
 
-            # --- RULE 2: Photo Scenario Overrides Lookup ---
-            photo_overrides = self._load_datastore("photo_overrides")
-            for scenario_key, scenario_data in photo_overrides.get("scenarios", {}).items():
-                trigger_phrases = scenario_data.get("triggers", [])
-                if any(trigger.lower() in lowered_sanitized for trigger in trigger_phrases):
-                    raw_res = self._execute_custom_module(
-                        relative_script_path="body/pipeline_compiler.py",
-                        function_name="execute_override_render",
-                        scenario_key=scenario_key,
-                        sanitized_prompt=sanitized_prompt
-                    )
-                    return self._append_routing_receipt(raw_res, "scenario_override", f"Matched override key '{scenario_key}'", trigger_phrases)
+            # Fallback traditional keyword lookups
+            if not is_imgen:
+                imgen_keywords = ["picture", "image", "render", "photo", "look like"]
+                is_imgen = any(kw in lowered_sanitized for kw in imgen_keywords)
 
-            # --- RULE 3: Regular Image Generation Keywords Lookup ---
-            image_keywords = ["picture", "selfie", "snap", "photo", "look like"]
-            matched_keywords = [kw for kw in image_keywords if kw in lowered_sanitized]
-            if matched_keywords:
-                raw_res = self._execute_custom_module(
-                    relative_script_path="body/pipeline_compiler.py",
-                    function_name="compile_fresh_image_generation",
-                    sanitized_prompt=sanitized_prompt
+            if is_imgen:
+                return self._execute_custom_module(
+                    "body/comfy_dispatch.py",
+                    "evaluate_visual_intent",
+                    prompt=lowered_sanitized,
+                    raw_prompt=raw_prompt,
                 )
-                return self._append_routing_receipt(raw_res, "pipeline_compiler", "Input string matched camera terms", matched_keywords)
 
-            # --- RULE 4: Chat Loop Fallback (Standard Dialogue turns) ---
-            raw_res = self._execute_custom_module(
-                relative_script_path="soul/chatter/chatter_core.py",
-                function_name="process_chatter_turn",
+            # --- STEP 4: Wardrobe Action Keyword Scans (Rule 3) ---
+            wardrobe_keywords = [
+                "wear",
+                "put on",
+                "take off",
+                "remove",
+                "change",
+                "swap",
+                "naked",
+                "clothes",
+                "outfit",
+            ]
+            if any(kw in lowered_sanitized for kw in wardrobe_keywords):
+                return self._execute_custom_module(
+                    "mind/inspector_utility.py",
+                    "process_wardrobe_request",
+                    prompt=lowered_sanitized,
+                )
+
+            # --- STEP 4.5: INTIMATE ORGASM CLIMAX OVERRIDES ---
+            orgasm_triggers = ["cum now", "orgasm", "climax for me", "let it go"]
+            if any(trigger in lowered_sanitized for trigger in orgasm_triggers):
+                state_file = self.paths.get("state")
+                try:
+                    with open(state_file, "r", encoding="utf-8") as f:
+                        s_data = json.load(f)
+
+                    status_list = s_data.get("mood", {}).get("status_effects", [])
+                    current_arousal = s_data.get("mood", {}).get("arousal", 0.0)
+
+                    if "masturbating" not in status_list and current_arousal < 1.0:
+                        return '🫣 "W-w-what?! I-I\'m not even close to something like that right now, senpai! *Blushes furiously* (Arousal level too low for climax event)"'
+
+                    print(
+                        "[ROUTER INTERCEPT] Climax event authorized. Triggering climax render loop."
+                    )
+
+                    # Update state metrics to handle post-climax crash parameters
+                    s_data["mood"]["arousal"] = 0.1
+                    if "masturbating" in s_data["mood"].get("status_effects", []):
+                        s_data["mood"]["status_effects"].remove("masturbating")
+
+                    with open(state_file, "w", encoding="utf-8") as f:
+                        json.dump(s_data, f, indent=2)
+
+                    # Forward directly to the generation engine to handle the portrait compilation
+                    climax_prompt = (
+                        "sensual portrait snapshot, explicit facial expression of intense climax ecstasy, "
+                        "eyes rolled back slightly, flushed blushing cheeks, heavy breathing, open mouth, sweat glisten"
+                    )
+                    return self._execute_custom_module(
+                        "body/comfy_dispatch.py",
+                        "trigger_forced_generation",
+                        raw_prompt=climax_prompt,
+                    )
+                except Exception as e:
+                    if self.paths["superglobals"]["debug_verbose"]:
+                        tb = traceback.format_exc()
+                        return f"❌ ```\n[ROUTER ERROR]\nScript: {relative_script_path} -> {function_name}\nError: {str(e)}\n\nFull Stack Traceback:\n{tb}\n```"
+                    else:
+                        return f"[ROUTER ERROR] Climax intercept failed: {str(e)}"
+
+            # --- STEP 5: Chatter Core Fallback Engine (Rule 4) ---
+            return self._execute_custom_module(
+                "soul/chatter/chatter_core.py",
+                "process_chatter_turn",
                 body=body,
-                sanitized_prompt=sanitized_prompt
+                sanitized_prompt=sanitized_prompt,
             )
-            return self._append_routing_receipt(raw_res, "chatter_core", "Default dialogue fallback active", [])
 
         except Exception as e:
-            return f"Neptune Face Router encountered a critical execution block: {str(e)}"
+            if self.paths["superglobals"]["debug_verbose"]:
+                tb = traceback.format_exc()
+                return f"❌ ```\n[ROUTER ERROR]\nScript: {relative_script_path} -> {function_name}\nError: {str(e)}\n\nFull Stack Traceback:\n{tb}\n```"
+            else:
+                return f"╮(＞_＜)╭ Face Router crashed out! Error: {str(e)}"

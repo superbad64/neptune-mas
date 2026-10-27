@@ -84,7 +84,7 @@
 				"bra": "naked",
 				"panties": "naked",
 				"socks": "naked",
-				"top": "pajama_top",
+				"top": "pajamas_top",
 				"bottom": "sweatpants",
 				"shoes": "naked",
 				"accessories": [],
@@ -209,7 +209,7 @@
 			"flavor_text": "a white dress shirt"
 		},
 		"pajamas_top": {
-			"triggers": ["pajamas top", "pjs top"],
+			"triggers": ["pajamas top", "pjs top", "pajama top"],
 			"prompt": "oversized grey hoodie",
 			"flavor_text": "a comfy grey hoodie"
 		},
