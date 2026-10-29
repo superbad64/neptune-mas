@@ -98,9 +98,11 @@ def transmit_graph_payload(compiled_positive: str, final_negative: str, is_resho
         except Exception as e:
             print(f"[COMFY ERROR] History parsing collapsed: {str(e)}")
 
-        image_url = f"http://{target_host}:{target_port}/api/view?filename={resolved_filename}&type=output&subfolder="
+        # --- FIXED: BYPASS LOOPBACK IPS AND FORCE RELATIVE WEB ROUTING ---
+        # Removing http://{host}:{port} lets Open-WebUI resolve the endpoint internally via standard proxy rules
+        image_url = f"/api/view?filename={resolved_filename}&type=output&subfolder="
         markdown_link = f"![Neptune Render Matrix]({image_url})"
-        
+
         state_file = "/app/backend/data/neptune/repository/neptune_current_state.json"
         if os.path.exists(state_file):
             try:

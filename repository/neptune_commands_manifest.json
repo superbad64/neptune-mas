@@ -1,0 +1,13 @@
+{
+  "commands": {
+    "help": { "module": "mind.sysadmin.handlers.help", "function": "execute_help" },
+    "voice": { "module": "mind.sysadmin.handlers.voice", "function": "execute_voice" },
+    "say": { "module": "mind.sysadmin.handlers.say", "function": "execute_say" },
+    "wipe": { "module": "mind.sysadmin.handlers.wipe", "function": "execute_wipe" },
+    "debug": { "module": "mind.sysadmin.handlers.debug", "function": "execute_debug" },
+    "dress": { "module": "mind.sysadmin.handlers.dress", "function": "execute_dress" },
+    "force": { "module": "mind.sysadmin.handlers.force", "function": "execute_force" },
+    "state": { "module": "mind.sysadmin.handlers.state", "function": "execute_state" },
+    "character": { "module": "mind.sysadmin.handlers.character", "function": "execute_character" }
+  }
+}

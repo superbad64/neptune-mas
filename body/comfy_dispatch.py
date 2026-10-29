@@ -430,13 +430,22 @@ def evaluate_visual_intent(prompt: str, raw_prompt: str) -> str:
         err_log = receipt if isinstance(receipt, str) else receipt.get('error_log')
         return f"❌ ```\n[COMFY ERROR]: {err_log}\n```"
 
-    output_body = f"{dialogue}\n\n{receipt.get('markdown')}" if dialogue else f"📸 *[Neptune renders a live graphic stream updates!]*\n\n{receipt.get('markdown')}"
+    # --- FIXED: DIRECT RELATIVE PASS FROM RECEIPT (BYPASSES FIREWALL IPS & SSRF) ---
+    # Grabs the pristine, host-relative markdown string generated natively by your graph core
+    image_markdown = receipt.get('markdown', '').strip()
+    
+    if not image_markdown and receipt.get('url'):
+        image_markdown = f"![Neptune Render Matrix]({receipt.get('url')})"
+
+    # Combine text dialogue smoothly with the relative image string
+    output_body = f"{dialogue}\n\n{image_markdown}" if dialogue else image_markdown
 
     if debug_verbosity:
         meta_panel = {
             "JOB_TRACKER_ID": receipt.get("prompt_id"),
             "MATCHED_OVERRIDE": matched["id"] if matched else "NONE (STANDARD PIPELINE)",
             "SAVED_URL_SLOT": receipt.get("url"),
+            "RECEIPT": receipt,
             "RESOLVED_POSITIVE": compiled_pos,
             "RESOLVED_NEGATIVE": base_neg,
             "CURRENT_AROUSAL": str(current_arousal)

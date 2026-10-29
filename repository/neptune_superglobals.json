@@ -1,3 +1,10 @@
 {
-    "debug_verbosity": true
+    "debug_verbosity": true,
+    "voice_active": false,
+    "container_root": "/app/backend/data/neptune",
+    "static_asset_route": "/static/audio_cache",
+    "voice_engine": {
+        "ref_audio_path": "/home/bad64/neptune-tts/ref.wav",
+        "ref_text": "i'm feeling extra hormonal today i am straight but i wanna be gay i low-key kinda wanna be degraded sorry master sorry gochujin-sama please punish me for talking too loud please"
+    }
 }

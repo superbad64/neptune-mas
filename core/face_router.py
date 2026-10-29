@@ -270,6 +270,9 @@ class Pipe:
 
                     # Update state metrics to handle post-climax crash parameters
                     s_data["mood"]["arousal"] = 0.1
+                    # --- FIXED: ENSURE MANUAL ROUTER ORGASMS ZERO OUT SELF-AROUSAL ---
+                    s_data["self_arousal"] = 0.0
+
                     if "masturbating" in s_data["mood"].get("status_effects", []):
                         s_data["mood"]["status_effects"].remove("masturbating")
 
@@ -296,7 +299,7 @@ class Pipe:
             # --- STEP 5: Chatter Core Fallback Engine (Rule 4) ---
             return self._execute_custom_module(
                 "soul/chatter/chatter_core.py",
-                "process_chatter_turn",
+                "NeptuneChatterCore.process_chatter_turn",
                 body=body,
                 sanitized_prompt=sanitized_prompt,
             )

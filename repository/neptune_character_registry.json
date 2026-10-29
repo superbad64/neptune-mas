@@ -13,5 +13,9 @@
         "dry": "(rumi usagiyama, deep dark brown skin tone, dark tan, amber eyes, heavily muscular athletic build, defined abs:1.4)",
         "wet": "(rumi usagiyama, deep dark brown skin tone, dark tan, amber eyes, heavily muscular athletic build, defined abs, glistening wet skin:1.45)",
         "default_outfit": "mirko_outfit"
+    },
+    "belle_delphine": {
+        "dry": "(lookalike of belle delphine:1.35), ((heart-shaped face, soft rounded chin, aegyo sal, double eyelids, button nose, slender nose bridge:1.3)), ((e-girl makeup, prominent winged black eyeliner, dramatic upper eyelashes, glossy pink lips, blended pink blush across nose and cheeks:1.35)), 3d game asset mesh, square enix cgi style, smooth soft matte porcelain skin, long pink hair, twin pigtails, dark brown eyes, highly detailed facial features",
+        "default_outfit": "goth_baddie"        
     }
 }
