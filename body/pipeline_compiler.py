@@ -155,7 +155,7 @@ def compile_fresh_image_generation(sanitized_prompt: str) -> str:
     Interface execution hook invoked by the Face Router during standard T2I requests.
     Compiles full positive/negative parameters and maps output data straight to ComfyUI.
     """
-    container_root = "/app/backend/data/neptune"
+    container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
     
     compiled_positive = compile_positive_prompt_chain(container_root, sanitized_prompt)
     

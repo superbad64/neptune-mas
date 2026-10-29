@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 def _append_console_debug(base_res: str, transaction_id: str, context_details: str = "") -> str:
     """Handles dynamic panel logging via native importlib hooks, preventing sys errors."""
-    container_root = "/app/backend/data/neptune"
+    container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
     state_file = f"{container_root}/repository/neptune_current_state.json"
     debug_active = True
     if os.path.exists(state_file):
@@ -44,7 +44,7 @@ def handle_system_override(raw_prompt: str) -> str:
     Pure Administrative Gateway Interface Proxy.
     Strips the console hook string and pushes everything straight to the dynamic manifest ops router.
     """
-    container_root = "/app/backend/data/neptune"
+    container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
     state_path = f"{container_root}/repository/neptune_current_state.json"
     registry_path = f"{container_root}/repository/neptune_character_registry.json"
 

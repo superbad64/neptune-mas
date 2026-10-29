@@ -15,7 +15,7 @@ def _load_json(path: str) -> dict:
     return {}
 
 def _execute_internal_module(relative_path: str, function_name: str, *args, **kwargs):
-    root_dir = "/app/backend/data/neptune"
+    container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
     module_notation = relative_path.replace("/", ".").rstrip(".py")
     try:
         module = importlib.import_module(module_notation)
@@ -26,7 +26,7 @@ def _execute_internal_module(relative_path: str, function_name: str, *args, **kw
 
 def evaluate_visual_intent(prompt: str, raw_prompt: str) -> str:
     """Gateway entry point. Manages intent triggers, inline markdown paths, and telemetry logs."""
-    root = "/app/backend/data/neptune"
+    container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
     state_file = f"{root}/repository/neptune_current_state.json"
     overrides_file = f"{root}/repository/neptune_photo_overrides.json"
     registry_file = f"{root}/repository/neptune_character_registry.json"

@@ -1,0 +1,77 @@
+.
+├── README.md
+├── architecture
+│   ├── chatter.md
+│   ├── clothing engine.md
+│   ├── image generation.md
+│   ├── orchestration.md
+│   ├── sysadmin.md
+│   └── system overrides.md
+├── body
+│   ├── comfy_dispatch.py
+│   ├── comfy_graph.py
+│   ├── pipeline_compiler.py
+│   └── voice_dispatch.py
+├── core
+│   ├── diagnostics_logger.py
+│   └── face_router.py
+├── mind
+│   ├── coder
+│   │   ├── coder_core.py
+│   │   └── logs
+│   ├── inspector_utility.py
+│   └── sysadmin
+│       ├── handlers
+│       │   ├── character.py
+│       │   ├── debug.py
+│       │   ├── dress.py
+│       │   ├── force.py
+│       │   ├── help.py
+│       │   ├── say.py
+│       │   ├── state.py
+│       │   ├── voice.py
+│       │   └── wipe.py
+│       ├── sysadmin_core.py
+│       ├── sysadmin_ops.py
+│       └── sysadmin_ssh_worker.py
+├── neptune_test.wav
+├── repository
+│   ├── Image generation
+│   │   └── ponyrealism_workflow.json
+│   ├── Personalities
+│   │   ├── Base Personality.txt
+│   │   ├── Face.txt
+│   │   ├── Primary Chatter.txt
+│   │   ├── Secondary Chatter.txt
+│   │   └── Sysadmin.txt
+│   ├── neptune_character_registry.json
+│   ├── neptune_commands_manifest.json
+│   ├── neptune_current_state.json
+│   ├── neptune_photo_engine.json
+│   ├── neptune_photo_overrides.json
+│   ├── neptune_superglobals.json
+│   ├── neptune_wardrobe_manifest.json
+│   └── voice_samples
+│       ├── Ara_Ara_by_Limitliss.mp3
+│       ├── Cute_and_Breedable_by_Limitliss.mp3
+│       ├── Extra_Hormonal_by_Limitliss.mp3
+│       ├── I_Am_Straight_But_by_Limitliss.mp3
+│       ├── I_Wanna_Be_Gay_by_Limitliss.mp3
+│       ├── Lowkey_Degraded_by_Limitliss.mp3
+│       ├── Please_Master_by_Limitliss.mp3
+│       ├── clips.txt
+│       ├── neptune_voice_base.txt
+│       └── neptune_voice_base.wav
+├── savestate.md
+├── soul
+│   ├── chatter
+│   │   └── chatter_core.py
+│   └── mood_engine.py
+├── sync.sh
+├── tests
+│   ├── test_chatter_core.py
+│   ├── test_harness_core.py
+│   └── unit_tests
+└── tree.txt
+
+17 directories, 58 files

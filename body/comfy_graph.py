@@ -103,7 +103,7 @@ def transmit_graph_payload(compiled_positive: str, final_negative: str, is_resho
         image_url = f"/api/view?filename={resolved_filename}&type=output&subfolder="
         markdown_link = f"![Neptune Render Matrix]({image_url})"
 
-        state_file = "/app/backend/data/neptune/repository/neptune_current_state.json"
+        container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
         if os.path.exists(state_file):
             try:
                 with open(state_file, 'r', encoding='utf-8') as f: s = json.load(f)

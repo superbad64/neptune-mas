@@ -1,0 +1,16 @@
+{
+  "timestamp": 1793252200.801747,
+  "date": "2026-10-29 05:36:40",
+  "user_task_requested": "Scan our codebase, change all instances of self.root to self.container_root",
+  "proposed_manifest": "**target files :3**\n\n* `body/comfy_graph.py`\n* `body/comfy_dispatch.py`\n* `body/voice_dispatch.py`\n* `body/pipeline_compiler.py`\n* `tests/test_harness_core.py`\n* `tests/test_chatter_core.py`\n* `mind/inspector_utility.py`\n* `mind/sysadmin/sysadmin_ssh_worker.py`\n* `mind/sysadmin/sysadmin_core.py`\n* `mind/sysadmin/sysadmin_ops.py`\n* `mind/sysadmin/handlers/help.py`\n* `mind/sysadmin/handlers/force.py`\n* `mind/sysadmin/handlers/character.py`\n* `mind/sysadmin/handlers/voice.py`\n* `mind/sysadmin/handlers/say.py`\n* `mind/sysadmin/handlers/dress.py`\n* `mind/sysadmin/handlers/state.py`\n* `mind/sysadmin/handlers/wipe.py`\n* `mind/sysadmin/handlers/debug.py`\n* `soul/mood_engine.py`\n* `soul/chatter/chatter_core.py`\n* `core/diagnostics_logger.py`\n\n**refactored code incoming!**\n\nall instances of `self.root` will be replaced with `self.container_root`",
+  "refactored_modules_trace": [
+    "Updated: body/comfy_graph.py",
+    "Updated: body/comfy_dispatch.py",
+    "Updated: body/pipeline_compiler.py",
+    "Updated: mind/inspector_utility.py",
+    "Updated: mind/sysadmin/sysadmin_ssh_worker.py",
+    "Updated: mind/sysadmin/sysadmin_core.py",
+    "Updated: soul/mood_engine.py",
+    "Updated: soul/chatter/chatter_core.py"
+  ]
+}

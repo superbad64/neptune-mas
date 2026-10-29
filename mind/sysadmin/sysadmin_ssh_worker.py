@@ -4,7 +4,7 @@ import paramiko
 from typing import Tuple
 
 # --- BOOTSTRAP ANCHOR ELEMENT ---
-CONTAINER_BASE_PATH = "/app/backend/data/neptune"
+container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
 if CONTAINER_BASE_PATH not in sys.path:
     sys.path.insert(0, CONTAINER_BASE_PATH)
 

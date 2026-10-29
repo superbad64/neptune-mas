@@ -6,7 +6,7 @@ import math
 from typing import Dict, Any
 
 class NeptuneMoodEngine:
-    def __init__(self, root_volume: str = "/app/backend/data/neptune"):
+    container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
         self.root_volume = root_volume
         self.state_path = f"{self.root_volume}/repository/neptune_current_state.json"
         

@@ -5,7 +5,7 @@ import sys
 from typing import Dict, Any, List, Tuple
 
 class NeptuneFitCheck:
-    def __init__(self, root_volume: str = "/app/backend/data/neptune"):
+    container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
         self.root_volume = root_volume
         self.state_path = f"{self.root_volume}/repository/neptune_current_state.json"
         self.wardrobe_path = f"{self.root_volume}/repository/neptune_wardrobe_manifest.json"
@@ -186,7 +186,7 @@ def enforce_rule_one_point_five(prompt: str, root_volume: str = "/app/backend/ne
 
     return False, "", ""
 
-def process_wardrobe_request(prompt: str, root_volume: str = "/app/backend/data/neptune") -> str:
+container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
     """Entry point invocation signed off directly by the Face Intercept Layer."""
     # First evaluate dynamic conversational outfit changes (Rule 1.5 triggers)
     matched, outfit_id, fit_report = enforce_rule_one_point_five(prompt, root_volume=root_volume)

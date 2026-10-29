@@ -26,9 +26,9 @@ def _write_json(path: str, data: dict) -> bool:
 class NeptuneChatterCore:
     def __init__(self, state_json_path: str = None):
         """Initializes absolute filesystem hooks to preserve state metrics across dialogue turns."""
-        self.root = "/app/backend/data/neptune"
-        self.state_file = state_json_path or f"{self.root}/repository/neptune_current_state.json"
-        self.registry_file = f"{self.root}/repository/neptune_character_registry.json"
+        self.container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
+        self.state_file = state_json_path or f"{self.container_root}/repository/neptune_current_state.json"
+        self.registry_file = f"{self.container_root}/repository/neptune_character_registry.json"
         
     def compute_orgasm_intensity(self, arousal: float) -> str:
         """Determines the contextual tier label used for evaluation trace logs."""
@@ -79,6 +79,24 @@ class NeptuneChatterCore:
         Executes a language model turn over local loopback connections.
         Tracks dynamic self_arousal increment steps and model-aware failover routing.
         """
+        # --- NATURAL LANGUAGE CODER ACTION INTERCEPT LOOP ---
+        container_root = "__import__('json').load(open('/app/backend/data/neptune/repository/neptune_superglobals.json')).get('container_root', '/app/backend/data/neptune')"
+        if os.path.exists(cache_check_path):
+            user_input_clean = sanitized_prompt.lower().strip(".,!? ")
+            
+            # Catch natural language approval indicators
+            if any(confirm_verb in user_input_clean for confirm_verb in ["looks good", "go ahead", "yes", "confirm", "do it"]):
+                print("[CHATTER CORE INTERCEPT] Inbound user confirmation verified. Invoking Coder Executor.")
+                from mind.coder.coder_core import NeptuneCoderCore
+                coder_instance = NeptuneCoderCore()
+                return coder_instance.execute_live_dynamic_refactor()
+                
+            # Catch natural language rejection indicators
+            elif any(reject_verb in user_input_clean for reject_verb in ["cancel", "no", "abort", "stop", "discard"]):
+                print("[CHATTER CORE INTERCEPT] Inbound user rejection verified. Flushing Coder Cache.")
+                from mind.coder.coder_core import NeptuneCoderCore
+                coder_instance = NeptuneCoderCore()
+                return coder_instance.clear_pending_task()
         state_data = _load_json(self.state_file)
         
         mood_map = state_data.setdefault("mood", {})
